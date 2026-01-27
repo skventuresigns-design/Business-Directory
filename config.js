@@ -9,18 +9,22 @@ const baseCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSHo8m-VL73x
 const placeholderImg = "images/placeholder.png";
 
 const catEmojis = {
+    "Agriculture": "🚜"
     "Automotive": "🚗",
     "Beauty": "💇‍♀️",
     "Construction": "🏗️",
-    "Dining": "🍔",
+    "Church": "⛪",
+    "Dining": "🍴",
+    "Government": "🏛️",
+    "Education": "🎓",
     "Entertainment": "🍿",
     "Financial": "💵",
-    "Health": "🏥",
+    "Healthcare": "🏥",
     "Legal": "⚖️",
     "Manufacturing": "🏭",
     "Real Estate": "🏠",
     "Retail": "🛍️",
-    "Services": "🤝",
+    "Services": "🛠️",
     "Technology": "💻",
     "Other": "📁"
 };
