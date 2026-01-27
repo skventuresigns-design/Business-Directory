@@ -5,7 +5,7 @@
 }
 
 body {
-    background-color: #d1d5db;
+    background-color: #e5e5e5;
     font-family: 'Times New Roman', Times, serif;
     margin: 0;
     padding: 0;
@@ -13,19 +13,24 @@ body {
 
 /* --- NAVIGATION --- */
 .nav-header {
-    background-color: var(--smlc-blue);
-    padding: 12px 0;
+    display: block !important; /* Forces it to show */
+    background-color: #38b6ff !important; /* SMLC Blue */
+    padding: 15px 0;
     text-align: center;
     border-bottom: 2px solid #000;
+    width: 100%;
+    position: relative;
+    z-index: 999;
 }
 
 .nav-header a {
-    color: white;
+    color: #ffffff !important;
     text-decoration: none;
     font-weight: bold;
     margin: 0 15px;
-    text-transform: uppercase;
-    font-size: 0.9rem;
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
 }
 
 /* --- NEWSPAPER HEADER & META --- */
