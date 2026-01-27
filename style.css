@@ -71,7 +71,7 @@ body {
 .right-meta { text-align: right; }
 
 .directory-pages {
-    border: 2px solid #222222; /* Fixed the extra '2' here */
+    /* border: 2px solid #222222;  Fixed the extra '2' here */
     padding: 4px 15px;
     font-size: 1.1rem;
     display: inline-block;
