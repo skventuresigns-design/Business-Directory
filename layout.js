@@ -59,19 +59,25 @@ function displayData(data) {
 
 // FIX: This function now ignores CAPS so the dropdowns always work
 function applyFilters() {
-    const townVal = document.getElementById('town-select').value.toLowerCase();
+    // 1. Emergency Alert - if this doesn't pop up, the link is broken
+    // alert("Filter Triggered!"); 
+
+    // 2. Get the dropdown values
+    const townVal = document.getElementById('town-select').value;
     const catVal = document.getElementById('cat-select').value;
     
+    // 3. Filter the master data
     let filtered = masterData.filter(biz => {
-        const bizTown = (biz.town || "").toLowerCase();
-        const bizCat = (biz.category || "");
+        // Handle Town Filter
+        const matchesTown = (townVal === 'All' || (biz.town && biz.town.includes(townVal)));
         
-        const matchesTown = (townVal === 'all' || bizTown.includes(townVal));
-        const matchesCat = (catVal === 'All' || bizCat === catVal);
+        // Handle Category Filter
+        const matchesCat = (catVal === 'All' || biz.category === catVal);
         
         return matchesTown && matchesCat;
     });
-
+    
+    // 4. Update the screen
     displayData(filtered);
 }
 
