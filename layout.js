@@ -40,8 +40,15 @@ function initDirectory() {
 // 3. RENDER THE LISTINGS
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
+    const countElement = document.getElementById('listing-count'); // The new counter
+    
     if (!grid) return;
     grid.innerHTML = '';
+
+    // Update the counter text
+    if (countElement) {
+        countElement.innerText = `Showing ${data.length} Local Businesses`;
+    }
 
     data.forEach(biz => {
         // Town Formatting for the Card Bar
