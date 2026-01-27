@@ -1,4 +1,3 @@
-/** * MODAL.JS - THE POP-OUT ENGINE */
 function openFullModal(bizName) {
     const biz = masterData.find(b => b.name === bizName);
     if (!biz) return;
