@@ -1,64 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clay County Business Directory | SMLC</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-</head>
-<body>
+/**
+ * LAYOUT.JS - The Directory Engine
+ */
+let masterData = [];
 
-    <div class="nav-header">
-        <a href="https://supportmylocalcommunity.com/">Home</a>
-        <a href="https://supportmylocalcommunity.com/clay-city/">Clay City</a>
-        <a href="https://ourflora.com/">Flora</a>
-        <a href="https://supportmylocalcommunity.com/louisville/">Louisville</a>
-        <a href="https://supportmylocalcommunity.com/sailor-springs/">Sailor Springs</a>
-        <a href="https://supportmylocalcommunity.com/xenia/">Xenia</a>
-    </div>
+document.addEventListener('DOMContentLoaded', () => {
+    initDirectory();
+});
 
-    <header class="main-title">
-        <h1>Clay County Directory</h1>
-        <div class="newspaper-meta single-row">
-            <div class="meta-item left-meta">VOL. 1 — NO. 1 | January 27, 2026</div>
-            <div class="meta-item">
-                <select id="town-select" onchange="applyFilters()">
-                    <option value="All">📍 All Towns</option>
-                    <option value="Flora">Flora</option>
-                    <option value="Louisville">Louisville</option>
-                    <option value="Clay City">Clay City</option>
-                    <option value="Xenia">Xenia</option>
-                    <option value="Sailor Springs">Sailor Springs</option>
-                </select>
-            </div>
-            <div class="meta-item center-header">
-                <span class="directory-pages">BUSINESS DIRECTORY PAGES</span>
-            </div>
-            <div class="meta-item">
-                <select id="cat-select" onchange="applyFilters()">
-                    <option value="All">📂 All Industries</option>
-                </select>
-            </div>
-            <div class="meta-item right-meta">
-                CLAY COUNTY, IL
-            </div>
-        </div>
-    </header>
+function initDirectory() {
+    Papa.parse(baseCsvUrl, {
+        download: true,
+        header: true,
+        complete: function(results) {
+            masterData = results.data.filter(row => row.name);
+            populateCategoryFilter(masterData);
+            displayData(masterData);
+            setupModalClose();
+        }
+    });
+}
 
-    <div class="site-wrapper">
-        <div id="directory-grid"></div>
-    </div>
+function displayData(data) {
+    const grid = document.getElementById('directory-grid');
+    grid.innerHTML = '';
 
-    <div id="premium-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
-        <div class="modal-content" style="background:#fff; width:90%; max-width:800px; max-height:90vh; overflow-y:auto; padding:30px; border-radius:10px; position:relative; font-family:'Times New Roman', serif;">
-            <span class="close-modal" style="position:absolute; top:15px; right:20px; font-size:40px; cursor:pointer; font-weight:bold;">&times;</span>
-            <div id="modal-body"></div>
-        </div>
-    </div>
+    data.forEach(biz => {
+        const town = (biz.town || "Clay County").trim().split(',')[0].replace(" IL", "").trim();
+        const townClass = town.toLowerCase().replace(/\s+/g, '-');
+        const card = document.createElement('div');
+        card.className = `card ${biz.tier ? biz.tier.toLowerCase() : 'basic'}`;
+        
+        // Premium Click Logic
+        if(biz.tier === 'Premium') {
+            card.onclick = () => openFullModal(biz.name);
+        }
 
-    <script src="config.js"></script>
-    <script src="modal.js"></script>
-    <script src="layout.js"></script>
-</body>
-</html>
+        card.innerHTML = `
+            <div class="logo-box">${getSmartImage(biz.imageid)}</div>
+            <h3>${biz.name}</h3>
+            <div class="town-bar ${townClass}-bar">${town}</div>
+            <p>${biz.phone}</p>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function getSmartImage(id) {
+    if (!id || id === "N/A") return `<img src="${placeholderImg}" alt="Placeholder">`;
+    return `<img src="https://lh3.googleusercontent.com/d/${id}" alt="Business Logo">`;
+}
+
+function populateCategoryFilter(data) {
+    const select = document.getElementById('cat-select');
+    const categories = [...new Set(data.map(item => item.category))].filter(Boolean).sort();
+    categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = `${catEmojis[cat] || '📁'} ${cat}`;
+        select.appendChild(opt);
+    });
+}
+
+function applyFilters() {
+    const townVal = document.getElementById('town-select').value;
+    const catVal = document.getElementById('cat-select').value;
+
+    let filtered = masterData;
+
+    if (townVal !== 'All') {
+        filtered = filtered.filter(b => b.town && b.town.includes(townVal));
+    }
+    if (catVal !== 'All') {
+        filtered = filtered.filter(b => b.category === catVal);
+    }
+
+    displayData(filtered);
+}
