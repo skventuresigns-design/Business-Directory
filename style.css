@@ -111,13 +111,56 @@ body {
 
 .logo-box img { max-width: 100%; max-height: 100%; }
 
-.town-bar {
+/*.town-bar {
     background: #000;
     color: #fff;
     padding: 5px;
     margin: 10px -15px;
     font-weight: bold;
     text-transform: uppercase;
+}*/
+
+/* --- UPDATED TOWN COLORS --- */
+
+.flora-bar {
+    background-color: #ff6600 !important; /* Flora Orange */
+    color: #ffffff !important;            /* White Text */
+}
+
+.louisville-bar {
+    background-color: #cc0000 !important; /* Louisville Red */
+    color: #ffffff !important;            /* White Text */
+}
+
+.clay-city-bar {
+    background-color: #0044cc !important; /* Clay City Blue */
+    color: #ffffff !important;            /* White Text */
+}
+
+.xenia-bar {
+    background-color: #000000 !important; /* Xenia Black */
+    color: #ffffff !important;            /* White Text */
+}
+
+.sailor-springs-bar {
+    background-color: #000000 !important; /* Sailor Springs Black */
+    color: #ffffff !important;            /* White Text */
+}
+
+/* Weather*/
+.weather-text {
+    color: #ffffff;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin-left: 20px;
+}
+
+/* Hide weather on mobile so the menu stays clean */
+@media (max-width: 768px) {
+    .weather-text {
+        display: none;
+    }
 }
 
 /* --- MOBILE RESPONSIVENESS (Screens smaller than 768px) --- */
