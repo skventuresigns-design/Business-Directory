@@ -126,6 +126,33 @@ function applyFilters() {
     if (catVal !== 'All') {
         filtered = filtered.filter(b => b.category === catVal);
     }
-    
-    displayData(filtered);
+     displayData(filtered);
 }
+
+/**
+ * WEATHER WIDGET - Pulls live data for Flora/Clay County
+ */
+async function getLocalWeather() {
+    const weatherBox = document.getElementById('weather-box');
+    if (!weatherBox) return;
+
+    try {
+        // Using a free weather API for 62839 (Flora, IL)
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.66&longitude=-88.48&current_weather=true');
+        const data = await response.json();
+        
+        if (data.current_weather) {
+            const tempC = data.current_weather.temperature;
+            const tempF = Math.round((tempC * 9/5) + 32);
+            weatherBox.innerHTML = ` | 🌡️ Flora: ${tempF}°F`;
+        }
+    } catch (error) {
+        console.log("Weather update failed.");
+    }
+}
+
+// Add this line to your existing document listener in layout.js
+document.addEventListener('DOMContentLoaded', () => {
+    initDirectory();
+    getLocalWeather(); // This starts the weather engine
+});
