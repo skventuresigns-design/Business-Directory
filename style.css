@@ -11,6 +11,20 @@ body {
     padding: 0;
 }
 
+.site-wrapper {
+    max-width: 1200px;      /* This stops the listings from spreading too far */
+    margin: 0 auto;         /* This centers the whole block on the screen */
+    padding: 0 40px;        /* This adds 'breathing room' so they don't touch the edges on mobile */
+}
+
+/* Ensure the grid itself stays within the wrapper */
+#directory-grid {
+    width: 100%;
+    margin-top: 20px;
+}
+
+
+
 /* --- NAVIGATION --- */
 .nav-header {
     display: block !important;
