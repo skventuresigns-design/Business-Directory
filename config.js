@@ -14,7 +14,7 @@ const catEmojis = {
     "Beauty": "💇‍♀️",
     "Construction": "🏗️",
     "Church": "⛪",
-    "Education": "🎓"
+    "Education": "🎓".
     "Entertainment": "🍿",
     "Financial": "💵",
     "Government": "🏛️",
