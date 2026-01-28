@@ -19,8 +19,7 @@ const catEmojis = {
     "Services": "🛠️",
     "Government": "🏛️",
     "Church": "⛪",
-    "Education": "🎓",
-    "Agriculture": "🚜"
+    "Education": "🎓"
 };
 
 function mapCategory(cat) {
