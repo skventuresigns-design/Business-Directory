@@ -65,5 +65,37 @@
     <script src="config.js"></script>
     <script src="modal.js"></script>
     <script src="layout.js"></script>
+
+  /*Premium Modal code*/
+    <div id="premium-modal" class="modal-overlay">
+    <div class="modal-content paper-texture">
+        <span class="close-modal" onclick="closePremiumModal()">&times;</span>
+        
+        <div class="modal-body">
+            <div id="modal-logo" class="modal-logo-box"></div>
+            <h2 id="modal-name" class="newspaper-font"></h2>
+            <div id="modal-town-bar" class="modal-town-bar"></div>
+            
+            <hr class="news-divider">
+            
+            <div class="modal-details">
+                <p><strong>📍 Address:</strong> <span id="modal-address"></span></p>
+                <p><strong>📞 Phone:</strong> <span id="modal-phone"></span></p>
+                <p><strong>📂 Category:</strong> <span id="modal-category"></span></p>
+            </div>
+
+            <div class="coupon-section">
+                <div class="coupon-border">
+                    <p class="coupon-title">DIGITAL COUPON</p>
+                    <p id="modal-coupon">Show this screen at checkout for a special community discount!</p>
+                </div>
+            </div>
+
+            <a id="modal-call-link" href="" class="call-btn">CALL NOW</a>
+        </div>
+    </div>
+</div>
+
+    
 </body>
 </html>
