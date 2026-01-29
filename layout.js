@@ -41,6 +41,7 @@ function initDirectory() {
             
             if (masterData.length > 0) {
                 populateCategoryFilter(masterData);
+                populateTownFilter(masterData);
                 displayData(masterData);
             } else {
                 grid.innerHTML = '<p>No listings found in the spreadsheet.</p>';
@@ -135,4 +136,51 @@ function updateMastheadDate() {
         const today = new Date();
         dateElement.innerText = today.toLocaleDateString('en-US', options);
     }
+}
+
+
+// 8. THE FILTER ENGINE
+function applyFilters() {
+    console.log("Filtering initiated...");
+    
+    const townSelect = document.getElementById('town-select');
+    const catSelect = document.getElementById('cat-select');
+    
+    // Safety check: if the dropdowns don't exist yet, stop here
+    if (!townSelect || !catSelect) return;
+
+    const selectedTown = townSelect.value;
+    const selectedCat = catSelect.value;
+
+    const filteredData = masterData.filter(biz => {
+        // We check both versions (lowercase/Capital) to be safe
+        const bTown = biz.town || biz.Town || "";
+        const bCat = biz.category || biz.Category || "";
+
+        const townMatch = (selectedTown === "All" || bTown === selectedTown);
+        const catMatch = (selectedCat === "All" || bCat === selectedCat);
+
+        return townMatch && catMatch;
+    });
+
+    // Send the filtered results back to the screen
+    displayData(filteredData);
+}
+
+// 9. TOWN DROPDOWN GENERATOR
+function populateTownFilter(data) {
+    const select = document.getElementById('town-select');
+    if (!select) return;
+    
+    // Get unique towns, handle both 'town' and 'Town'
+    const towns = [...new Set(data.map(item => item.town || item.Town))].filter(Boolean).sort();
+    
+    select.innerHTML = '<option value="All">📍 All Towns</option>';
+    
+    towns.forEach(town => {
+        const opt = document.createElement('option');
+        opt.value = town;
+        opt.textContent = town;
+        select.appendChild(opt);
+    });
 }
