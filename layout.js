@@ -1,5 +1,5 @@
 /**
- * LAYOUT.JS - The Directory Engine (Defensive Version)
+ * LAYOUT.JS - The Directory Engine
  */
 
 let masterData = [];
@@ -8,6 +8,9 @@ let masterData = [];
 document.addEventListener('DOMContentLoaded', () => {
     console.log("System Check: DOM Loaded");
     
+    // Run the clock/date first
+    updateMastheadDate();
+
     // Safety check for config variables
     if (typeof baseCsvUrl === 'undefined') {
         console.error("CRITICAL: baseCsvUrl is missing from config.js");
@@ -21,10 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 2. FETCH DATA
 function initDirectory() {
     const grid = document.getElementById('directory-grid');
-    if (!grid) {
-        console.error("CRITICAL: Could not find 'directory-grid' in your HTML");
-        return;
-    }
+    if (!grid) return;
     
     grid.innerHTML = '<p style="text-align:center;">Loading Community Data...</p>';
 
@@ -33,8 +33,11 @@ function initDirectory() {
         header: true,
         skipEmptyLines: 'greedy',
         complete: function(results) {
-            console.log("Data Received:", results.data.length, "rows");
-            masterData = results.data.filter(row => row.name && row.name.trim() !== "");
+            // Flexible check for 'name' or 'Name'
+            masterData = results.data.filter(row => {
+                const n = row.name || row.Name;
+                return n && n.trim() !== "";
+            });
             
             if (masterData.length > 0) {
                 populateCategoryFilter(masterData);
@@ -45,70 +48,56 @@ function initDirectory() {
         },
         error: function(err) {
             console.error("PapaParse Error:", err);
-            grid.innerHTML = '<p>Error loading data. Check console.</p>';
         }
     });
 }
 
-// 3. RENDER LISTINGS
+// 3. RENDER LISTINGS (Cleaned & Combined)
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     data.forEach(biz => {
-        const tier = (biz.tier || 'basic').toLowerCase();
+        // TIER Logic
+        const tier = (biz.tier || biz.Tier || 'basic').toLowerCase();
+        
+        // TOWN Logic (Handles 'town' or 'Town')
+        const townRaw = (biz.town || biz.Town || "Clay County").trim().split(',')[0];
+        const townClean = townRaw.replace(" IL", "").trim();
+        const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
+
+        // IMAGE Logic (Handles 'imageid' or 'ImageID')
+        const imgFile = biz.imageid || biz.ImageID || "";
+
+        // OTHER DATA
+        const bizName = biz.name || biz.Name || "Unnamed Business";
+        const bizPhone = biz.phone || biz.Phone || "";
+        const bizCat = biz.category || biz.Category || "";
+
         const card = document.createElement('div');
         card.className = `card ${tier}`;
         
-        // Basic fallback for town colors
-        const townClean = (biz.town || "Local").split(',')[0].replace(" IL", "").trim();
-        const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
-
         card.innerHTML = `
-            <div class="logo-box">${getSmartImage(biz.imageid)}</div>
-            <h3>${biz.name || 'Unnamed Business'}</h3>
+            <div class="logo-box">${getSmartImage(imgFile)}</div>
+            <h3>${bizName}</h3>
             <div class="town-bar ${townClass}-bar">${townClean}</div>
-            <p>${biz.phone || ''}</p>
-            <p><i>${biz.category || ''}</i></p>
+            <p class="phone">${bizPhone}</p>
+            <p><i>${bizCat}</i></p>
         `;
         grid.appendChild(card);
     });
 }
 
-data.forEach(biz => {
-    // This looks for 'town' OR 'Town' OR 'TOWN'
-    const townRaw = (biz.town || biz.Town || biz.TOWN || "Clay County").trim().split(',')[0];
-    const townClean = townRaw.replace(" IL", "").trim();
-    const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
-    
-    // Do the same for Name, Phone, and Category to be safe
-    const bizName = biz.name || biz.Name || "Unnamed Business";
-    const bizPhone = biz.phone || biz.Phone || "";
-    const bizCat = biz.category || biz.Category || "";
-
-
-// This looks for 'imageid', 'ImageID', or 'IMAGEID' automatically
-const imgFile = biz.imageid || biz.ImageID || biz.Imageid || "";
-
-card.innerHTML = `
-    <div class="logo-box">${getSmartImage(imgFile)}</div>
-    <h3>${biz.name || 'Unnamed Business'}</h3>
-    <div class="town-bar ${townClass}-bar">${townClean}</div>
-    <p>${biz.phone || ''}</p>
-    <p><i>${biz.category || ''}</i></p>
-`;
-
-
-// 4. IMAGE HANDLER (Uses the config.js mediaRepoBase)
+// 4. IMAGE HANDLER
 function getSmartImage(id) {
     const placeholder = "https://via.placeholder.com/150?text=SMLC";
     const repo = (typeof mediaRepoBase !== 'undefined') ? mediaRepoBase : "";
 
     if (!id || id === "N/A" || id.trim() === "") return `<img src="${placeholder}" alt="Logo">`;
-    if (id.startsWith('http')) return `<img src="${id}" alt="Logo" onerror="this.src='${placeholder}'">`;
+    if (id.toString().startsWith('http')) return `<img src="${id}" alt="Logo" onerror="this.src='${placeholder}'">`;
     
-    return `<img src="${repo}${id.trim()}" alt="Logo" onerror="this.src='${placeholder}'">`;
+    return `<img src="${repo}${id.toString().trim()}" alt="Logo" onerror="this.src='${placeholder}'">`;
 }
 
 // 5. WEATHER
@@ -121,9 +110,7 @@ async function getLocalWeather() {
         if (data && data.current_weather) {
             weatherBox.innerHTML = ` | 🌡️ Flora: ${Math.round((data.current_weather.temperature * 9/5) + 32)}°F`;
         }
-    } catch (e) { 
-        console.log("Weather service unreachable"); 
-    }
+    } catch (e) { console.log("Weather service unreachable"); }
 }
 
 // 6. DROPDOWN GENERATOR
@@ -131,7 +118,7 @@ function populateCategoryFilter(data) {
     const select = document.getElementById('cat-select');
     if (!select) return;
     
-    const categories = [...new Set(data.map(item => item.category))].filter(Boolean).sort();
+    const categories = [...new Set(data.map(item => item.category || item.Category))].filter(Boolean).sort();
     select.innerHTML = '<option value="All">📂 All Industries</option>';
     
     categories.forEach(cat => {
@@ -143,18 +130,12 @@ function populateCategoryFilter(data) {
     });
 }
 
+// 7. DATE HANDLER
 function updateMastheadDate() {
-    const dateElement = document.getElementById('masthead-date'); // Or whatever ID you used in HTML
+    const dateElement = document.getElementById('masthead-date');
     if (dateElement) {
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const today = new Date();
         dateElement.innerText = today.toLocaleDateString('en-US', options);
     }
 }
-
-// Add this line inside your existing 'DOMContentLoaded' listener
-document.addEventListener('DOMContentLoaded', () => {
-    updateMastheadDate(); // <--- Add this
-    initDirectory();
-    getLocalWeather();
-});
