@@ -76,6 +76,19 @@ function displayData(data) {
     });
 }
 
+
+// This looks for 'imageid', 'ImageID', or 'IMAGEID' automatically
+const imgFile = biz.imageid || biz.ImageID || biz.Imageid || "";
+
+card.innerHTML = `
+    <div class="logo-box">${getSmartImage(imgFile)}</div>
+    <h3>${biz.name || 'Unnamed Business'}</h3>
+    <div class="town-bar ${townClass}-bar">${townClean}</div>
+    <p>${biz.phone || ''}</p>
+    <p><i>${biz.category || ''}</i></p>
+`;
+
+
 // 4. IMAGE HANDLER (Uses the config.js mediaRepoBase)
 function getSmartImage(id) {
     const placeholder = "https://via.placeholder.com/150?text=SMLC";
