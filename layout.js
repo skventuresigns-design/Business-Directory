@@ -76,6 +76,17 @@ function displayData(data) {
     });
 }
 
+data.forEach(biz => {
+    // This looks for 'town' OR 'Town' OR 'TOWN'
+    const townRaw = (biz.town || biz.Town || biz.TOWN || "Clay County").trim().split(',')[0];
+    const townClean = townRaw.replace(" IL", "").trim();
+    const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
+    
+    // Do the same for Name, Phone, and Category to be safe
+    const bizName = biz.name || biz.Name || "Unnamed Business";
+    const bizPhone = biz.phone || biz.Phone || "";
+    const bizCat = biz.category || biz.Category || "";
+
 
 // This looks for 'imageid', 'ImageID', or 'IMAGEID' automatically
 const imgFile = biz.imageid || biz.ImageID || biz.Imageid || "";
