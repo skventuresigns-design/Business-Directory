@@ -199,8 +199,13 @@ function updateListingCount(count) {
 // 11. MODAL LOGIC
 function openPremiumModal(encodedName) {
     const name = decodeURIComponent(encodedName);
+    console.log("Opening Modal for:", name); // Check your console (F12) for this!
     const biz = masterData.find(b => (b.name || b.Name) === name);
 
+    if (!biz) {
+        console.error("Could not find business data for:", name);
+        return;}
+    
     if (biz) {
         document.getElementById('modal-name').innerText = biz.name || biz.Name;
         document.getElementById('modal-address').innerText = biz.address || biz.Address || "Contact for address";
