@@ -195,3 +195,35 @@ function updateListingCount(count) {
         countElement.innerText = `${count} Listings Found`;
     }
 }
+
+// 11. MODAL LOGIC
+function openPremiumModal(encodedName) {
+    const name = decodeURIComponent(encodedName);
+    const biz = masterData.find(b => (b.name || b.Name) === name);
+
+    if (biz) {
+        document.getElementById('modal-name').innerText = biz.name || biz.Name;
+        document.getElementById('modal-address').innerText = biz.address || biz.Address || "Contact for address";
+        document.getElementById('modal-phone').innerText = biz.phone || biz.Phone || "N/A";
+        document.getElementById('modal-category').innerText = biz.category || biz.Category || "Local Business";
+        
+        // Update the Town Bar color
+        const town = (biz.town || biz.Town || "Clay County").trim();
+        const townBar = document.getElementById('modal-town-bar');
+        townBar.innerText = town;
+        townBar.className = `modal-town-bar ${town.toLowerCase().replace(/\s+/g, '-')}-bar`;
+
+        // Update Phone Link
+        document.getElementById('modal-call-link').href = `tel:${biz.phone || biz.Phone}`;
+
+        // Show Logo
+        const imgFile = biz.imageid || biz.ImageID || "";
+        document.getElementById('modal-logo').innerHTML = getSmartImage(imgFile);
+
+        document.getElementById('premium-modal').style.display = 'flex';
+    }
+}
+
+function closePremiumModal() {
+    document.getElementById('premium-modal').style.display = 'none';
+}
