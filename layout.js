@@ -45,20 +45,20 @@ function initDirectory() {
     });
 }
 
-// 3. RENDER LISTINGS
+
+// 3. RENDER LISTINGS (Simplified for better Premium matching)
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     data.forEach(biz => {
-        // Normalize Tier (Checks for 'tier' or 'Tier')
+        // Normalize Tier and Name
         const tier = (biz.tier || biz.Tier || 'basic').toLowerCase().trim();
+        const bizName = (biz.name || biz.Name || "Unnamed Business").trim();
         const town = (biz.town || biz.Town || "Clay County").trim();
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
-        const bizName = biz.name || biz.Name || "Unnamed Business";
 
-        // Logic: No phone for Basic
         const phone = biz.phone || biz.Phone || "";
         const phoneHtml = tier !== 'basic' ? `<p class="phone">${phone}</p>` : '';
 
@@ -77,34 +77,45 @@ function displayData(data) {
     });
 }
 
-// 4. THE PREMIUM POP-OUT
+
+// 4. THE PREMIUM POP-OUT (Town Bar & Website Link Fix)
 function openPremiumModal(encodedName) {
-    const name = decodeURIComponent(encodedName);
-    const biz = masterData.find(b => (b.name || b.Name) === name);
-    if (!biz) return;
+    const name = decodeURIComponent(encodedName).trim();
+    // Search both name and Name to be safe
+    const biz = masterData.find(b => 
+        (b.name || "").trim() === name || (b.Name || "").trim() === name
+    );
+    
+    if (!biz) {
+        console.error("Could not find business data for:", name);
+        return;
+    }
 
     const modal = document.getElementById('premium-modal');
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
     if (modalContainer) {
-        // Data Normalization (Fixes the Website/Address link issues)
-        const website = biz.website || biz.Website || "#";
+        // --- DATA NORMALIZATION ---
+        const rawWeb = (biz.website || biz.Website || "").trim();
+        // Fix: If the link doesn't start with http, add it automatically
+        const websiteUrl = (rawWeb && !rawWeb.startsWith('http')) ? `https://${rawWeb}` : rawWeb;
+        
         const address = biz.address || biz.Address || "Contact for Address";
+        const town = (biz.town || biz.Town || "Clay County").trim();
+        const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const phone = biz.phone || biz.Phone || "N/A";
         const category = biz.category || biz.Category || "Local Business";
         const hours = biz.hours || biz.Hours || "Mon-Fri: 8am - 5pm<br>Sat-Sun: Closed";
-        const mapAddress = encodeURIComponent(`${address}, ${biz.town || 'Clay County'}, IL`);
+        const mapAddress = encodeURIComponent(`${address}, ${town}, IL`);
 
-        // Set Container Style to prevent touching top/bottom
-        modalContainer.style.maxHeight = "85vh";
+        modalContainer.style.maxHeight = "90vh";
         modalContainer.style.overflowY = "auto";
-        modalContainer.style.padding = "40px";
 
         modalContainer.innerHTML = `
             <span onclick="closePremiumModal()" 
-                  style="position:absolute; top:15px; right:20px; font-size:45px; cursor:pointer; color:#222; font-weight:bold; z-index:999999; line-height:0.8;">&times;</span>
+                  style="position:absolute; top:15px; right:20px; font-size:45px; cursor:pointer; color:#222; font-weight:bold; z-index:999999; line-height:0.8;">×</span>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 10px;">
                 <div style="text-align: center;">
                     <div style="height: 100px; margin-bottom: 12px; display:flex; align-items:center; justify-content:center;">
                         ${getSmartImage(biz.imageid || biz.ImageID).replace('<img', '<img style="max-height:100%; max-width:100%;"')}
@@ -113,20 +124,22 @@ function openPremiumModal(encodedName) {
                 </div>
 
                 <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem;">
-                    <p style="margin: 15px 0;"><strong>📂 Category:</strong><br>${category}</p>
-                    <p style="margin: 15px 0;"><strong>📍 Address:</strong><br>${address}</p>
-                    <p style="margin: 15px 0;"><strong>📞 Phone:</strong><br>${phone}</p>
-                    <p style="margin: 15px 0;"><strong>🌐 Website:</strong><br><a href="${website}" target="_blank" style="color:#0044cc; text-decoration:underline;">Visit Website</a></p>
+                    <p style="margin: 12px 0;"><strong>📂 Category:</strong><br>${category}</p>
+                    <p style="margin: 12px 0;"><strong>📍 Address:</strong><br>${address}</p>
+                    <p style="margin: 12px 0;"><strong>📞 Phone:</strong><br>${phone}</p>
+                    <p style="margin: 12px 0;">${websiteUrl ? `<strong>🌐 Website:</strong><br><a href="${websiteUrl}" target="_blank" style="color:#0044cc; text-decoration:underline;">Visit Website</a>` : ''}</p>
                 </div>
             </div>
 
-            <hr style="border:0; border-top: 2px solid #222; margin: 15px 0;">
+            <div class="town-bar ${townClass}-bar" style="margin: 15px -40px; border-radius: 0; width: calc(100% + 80px); text-align: center; padding: 10px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">
+                ${town}
+            </div>
 
-            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 25px;">
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 25px; margin-top: 20px;">
                 <div style="height: 180px; border: 1px solid #222;">
                     <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${mapAddress}&output=embed"></iframe>
                 </div>
-                <div style="background:#fff; border:1px solid #222; padding:15px; font-size:0.85rem;">
+                <div style="background:#fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
                     <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ccc;">HOURS OF OPERATION</h4>
                     ${hours}
                 </div>
@@ -141,6 +154,7 @@ function openPremiumModal(encodedName) {
         modal.style.display = 'flex';
     }
 }
+
 
 // 5. GLOBAL HELPERS
 function closePremiumModal() {
