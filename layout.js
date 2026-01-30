@@ -79,15 +79,18 @@ function displayData(data) {
 
 
 // 4. THE PREMIUM POP-OUT (Town Bar & Website Link Fix)
+// --- UPDATED SEARCH LOGIC ---
 function openPremiumModal(encodedName) {
-    const name = decodeURIComponent(encodedName).trim();
-    // Search both name and Name to be safe
-    const biz = masterData.find(b => 
-        (b.name || "").trim() === name || (b.Name || "").trim() === name
-    );
+    const nameToFind = decodeURIComponent(encodedName).toLowerCase().trim();
+    
+    // Fuzzy Search: Find business regardless of case or hidden spaces
+    const biz = masterData.find(b => {
+        const currentName = (b.name || b.Name || "").toLowerCase().trim();
+        return currentName === nameToFind;
+    });
     
     if (!biz) {
-        console.error("Could not find business data for:", name);
+        console.error("DEBUG: Could not find match for:", nameToFind);
         return;
     }
 
@@ -95,10 +98,13 @@ function openPremiumModal(encodedName) {
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
     if (modalContainer) {
-        // --- DATA NORMALIZATION ---
-        const rawWeb = (biz.website || biz.Website || "").trim();
-        // Fix: If the link doesn't start with http, add it automatically
-        const websiteUrl = (rawWeb && !rawWeb.startsWith('http')) ? `https://${rawWeb}` : rawWeb;
+        // --- WEBSITE PROTOCOL FIX ---
+        let rawWeb = (biz.website || biz.Website || "").trim();
+        let websiteUrl = "";
+        if (rawWeb) {
+            // If it doesn't start with http, add it so the link actually works
+            websiteUrl = rawWeb.startsWith('http') ? rawWeb : `https://${rawWeb}`;
+        }
         
         const address = biz.address || biz.Address || "Contact for Address";
         const town = (biz.town || biz.Town || "Clay County").trim();
@@ -107,9 +113,6 @@ function openPremiumModal(encodedName) {
         const category = biz.category || biz.Category || "Local Business";
         const hours = biz.hours || biz.Hours || "Mon-Fri: 8am - 5pm<br>Sat-Sun: Closed";
         const mapAddress = encodeURIComponent(`${address}, ${town}, IL`);
-
-        modalContainer.style.maxHeight = "90vh";
-        modalContainer.style.overflowY = "auto";
 
         modalContainer.innerHTML = `
             <span onclick="closePremiumModal()" 
@@ -141,7 +144,7 @@ function openPremiumModal(encodedName) {
                 </div>
                 <div style="background:#fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
                     <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ccc;">HOURS OF OPERATION</h4>
-                    ${hours}
+                    <div style="line-height:1.4;">${hours}</div>
                 </div>
             </div>
 
