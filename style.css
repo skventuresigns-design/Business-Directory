@@ -108,8 +108,8 @@ body {
 .card.plus::after {
     content: "PLUS MEMBER";
     position: absolute;
-    top: 15px;      /* Lowered slightly */
-    right: -30px;   /* Pulled in from -35px */
+    top: 20px;      /* Lowered slightly */
+    right: -25px;   /* Pulled in from -35px */
     background: #2e7d32;
     color: white;
     font-size: 9px;
