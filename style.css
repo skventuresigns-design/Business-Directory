@@ -120,24 +120,31 @@ body {
 .logo-box img { max-width: 100%; max-height: 100%; }
 
 /* --- 4. THE READ MORE BUTTON (Black & Gold) --- */
+/* --- THE RESTORED PREMIUM BUTTON --- */
 .read-more-btn {
-    background-color: #222 !important;     /* Solid Black Background */
-    color: var(--gold-premium) !important; /* Gold Letters */
-    border: 2px solid var(--gold-premium) !important; /* Gold Border */
-    padding: 12px 20px;                   /* Larger size */
+    background-color: #222 !important;     /* Solid Black */
+    color: #d4af37 !important;           /* Gold Text */
+    border: 2px solid #d4af37 !important; /* Gold Border */
+    
+    /* These specific measurements restore the "S&K" look */
+    padding: 14px 24px !important;
     font-family: 'Playfair Display', serif;
-    font-weight: bold;
+    font-weight: 800 !important;         /* Makes it bold and impactful */
+    font-size: 14px !important;
+    letter-spacing: 2px !important;      /* Gives it that "magazine" spacing */
     text-transform: uppercase;
-    cursor: pointer;
+    
+    display: block;
     width: 100%;
-    margin-top: 15px;
-    font-size: 1rem;                      /* Larger text */
-    transition: all 0.3s ease;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
 }
 
 .read-more-btn:hover {
-    background-color: var(--gold-premium) !important; /* Flips to Gold on hover */
-    color: #222 !important;                            /* Flips to Black text */
+    background-color: #d4af37 !important; /* Flips to Gold */
+    color: #222 !important;               /* Flips to Black */
+    letter-spacing: 3px !important;      /* Subtle expansion effect */
 }
 
 /* --- 5. TOWN BARS --- */
