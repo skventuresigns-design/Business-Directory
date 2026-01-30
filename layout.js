@@ -96,38 +96,45 @@ function openPremiumModal(encodedName) {
     const name = decodeURIComponent(encodedName);
     const biz = masterData.find(b => (b.name || b.Name) === name);
 
-    if (!biz) return;
+    if (!biz) {
+        console.error("Business not found:", name);
+        return;
+    }
 
-    const modalContent = document.querySelector('#premium-modal .modal-content');
-    if (modalContent) {
-        modalContent.innerHTML = `
-            <span class="close-modal" onclick="closePremiumModal()">&times;</span>
-            <div class="premium-logo-frame" style="text-align:center; margin-bottom:20px;">
+    const modalContainer = document.querySelector('#premium-modal .modal-content');
+    
+    if (modalContainer) {
+        // We are writing the HTML directly here so nothing can "break" it in other files
+        modalContainer.innerHTML = `
+            <span onclick="closePremiumModal()" style="position:absolute; top:10px; right:20px; font-size:40px; cursor:pointer; color:#222; font-weight:bold;">&times;</span>
+            
+            <div style="text-align:center; margin-bottom:20px;">
                 ${getSmartImage(biz.imageid)}
             </div>
-            <h2 id="modal-name" style="font-family:serif; border-bottom:3px solid #222; color:#222; text-align:center;">${biz.name}</h2>
-            <div style="text-align:center; margin-bottom:15px;">
-                <span class="modal-town-label ${(biz.town || "clay-county").toLowerCase().replace(/\s+/g, '-')}-bar" style="padding:5px 15px; color:#fff; font-weight:bold; text-transform:uppercase;">${biz.town || 'Clay County'}</span>
+
+            <h2 style="font-family:serif; border-bottom:3px solid #222; color:#222; text-align:center; margin:0 0 15px 0; font-size:2rem;">${biz.name}</h2>
+            
+            <div style="text-align:center; margin-bottom:20px;">
+                <span style="background:#222; color:#fff; padding:5px 20px; font-weight:bold; text-transform:uppercase; font-size:0.9rem;">${biz.town || 'Clay County'}</span>
             </div>
-            <div class="premium-info-grid" style="color:#222; margin-top:20px;">
+
+            <div style="color:#222; line-height:1.6; font-size:1.1rem; text-align:left;">
                 <p><strong>📍 Address:</strong> ${biz.address || 'Contact for Address'}</p>
                 <p><strong>📞 Phone:</strong> ${biz.phone || 'N/A'}</p>
                 <p><strong>📂 Category:</strong> ${biz.category || 'Local Business'}</p>
             </div>
-            <div class="premium-coupon-box" style="border:2px dashed #cc0000; padding:15px; margin-top:20px; background:#fff; text-align:center;">
-                <span style="color:#cc0000; font-weight:bold;">COMMUNITY COUPON</span>
-                <p style="margin:5px 0 0 0; font-size:0.9rem; color:#222;">Show this screen to the business for a special local offer!</p>
-            </div>
-            
+
             <a href="tel:${(biz.phone || "").replace(/\D/g,'')}" 
-               class="premium-call-btn" 
-               style="display:block; background: linear-gradient(45deg, #bf953f, #fcf6ba, #aa771c); color:#222 !important; text-align:center; padding:18px; margin-top:20px; text-decoration:none; font-weight:bold; border:2px solid #222; text-transform:uppercase; letter-spacing:1px;">
+               style="display:block; background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); color:#222 !important; text-align:center; padding:18px; margin-top:30px; text-decoration:none; font-weight:900; border:1px solid #222; text-transform:uppercase; letter-spacing:2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">
                CALL BUSINESS NOW
             </a>
         `;
+        
+        // Show the box
         document.getElementById('premium-modal').style.display = 'flex';
     }
 }
+
 
 // 6. FILTERS
 function applyFilters() {
