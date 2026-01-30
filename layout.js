@@ -52,16 +52,13 @@ function displayData(data) {
     if (!grid) return;
     grid.innerHTML = '';
 
-    data.forEach(biz => {
+    data.forEach((biz, index) => {
         const tier = (biz.tier || biz.Tier || 'basic').toLowerCase().trim();
         const bizName = (biz.name || biz.Name || "Unnamed Business").trim();
         const town = (biz.town || biz.Town || "Clay County").trim();
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const phone = biz.phone || biz.Phone || "";
         const phoneHtml = tier !== 'basic' ? `<p class="phone">${phone}</p>` : '';
-
-        // We use encodeURIComponent to make symbols like & and ' safe!
-        const safeName = encodeURIComponent(bizName);
 
         const card = document.createElement('div');
         card.className = `card ${tier}`;
@@ -72,26 +69,19 @@ function displayData(data) {
             <div class="town-bar ${townClass}-bar">${town}</div>
             ${phoneHtml} 
             <p class="category-tag"><i>${biz.category || biz.Category || ""}</i></p>
-            ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal('${safeName}')">Read More</button>` : ''}
+            ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal(${index})">Read More</button>` : ''}
         `;
         grid.appendChild(card);
     });
 }
 
-
 // 4. THE PREMIUM POP-OUT (Town Bar & Website Link Fix)
-function openPremiumModal(safeName) {
-    // 1. Decode the name (e.g., change 'S%26K' back to 'S&K')
-    const nameToFind = decodeURIComponent(safeName).toLowerCase().trim();
-    
-    // 2. Find the business in the MASTER list, not the filtered screen list
-    const biz = masterData.find(b => {
-        const currentName = (b.name || b.Name || "").toLowerCase().trim();
-        return currentName === nameToFind;
-    });
+function openPremiumModal(index) {
+    // We pull the data directly from the Master list using the number
+    const biz = masterData[index];
     
     if (!biz) {
-        console.error("Could not find:", nameToFind);
+        console.error("No data found at index:", index);
         return;
     }
 
@@ -99,16 +89,11 @@ function openPremiumModal(safeName) {
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
     if (modalContainer) {
-        // Website Protocol Fix (Adds https:// if missing)
-        let rawWeb = (biz.website || biz.Website || "").trim();
-        let websiteUrl = (rawWeb && !rawWeb.startsWith('http')) ? `https://${rawWeb}` : rawWeb;
-        
-        const address = biz.address || biz.Address || "Contact for Address";
+        // This part is now safe because 'biz' is already a clean object from your data
+        const bizName = biz.name || biz.Name || "Business";
         const town = (biz.town || biz.Town || "Clay County").trim();
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
-        const phone = biz.phone || biz.Phone || "N/A";
-        const category = biz.category || biz.Category || "Local Business";
-        const hours = biz.hours || biz.Hours || "Mon-Fri: 8am - 5pm<br>Sat-Sun: Closed";
+        const address = biz.address || biz.Address || "";
         const mapAddress = encodeURIComponent(`${address}, ${town}, IL`);
 
         modalContainer.innerHTML = `
@@ -120,14 +105,13 @@ function openPremiumModal(safeName) {
                     <div style="height: 100px; margin-bottom: 12px; display:flex; align-items:center; justify-content:center;">
                         ${getSmartImage(biz.imageid || biz.ImageID).replace('<img', '<img style="max-height:100%; max-width:100%;"')}
                     </div>
-                    <h2 style="font-family:serif; font-size: 1.4rem; margin: 0;">${biz.name || biz.Name}</h2>
+                    <h2 style="font-family:serif; font-size: 1.4rem; margin: 0;">${bizName}</h2>
                 </div>
 
                 <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem;">
-                    <p style="margin: 12px 0;"><strong>📂 Category:</strong><br>${category}</p>
+                    <p style="margin: 12px 0;"><strong>📂 Category:</strong><br>${biz.category || biz.Category}</p>
                     <p style="margin: 12px 0;"><strong>📍 Address:</strong><br>${address}</p>
-                    <p style="margin: 12px 0;"><strong>📞 Phone:</strong><br>${phone}</p>
-                    <p style="margin: 12px 0;">${websiteUrl ? `<strong>🌐 Website:</strong><br><a href="${websiteUrl}" target="_blank" style="color:#0044cc; text-decoration:underline;">Visit Website</a>` : ''}</p>
+                    <p style="margin: 12px 0;"><strong>📞 Phone:</strong><br>${biz.phone || biz.Phone}</p>
                 </div>
             </div>
 
@@ -141,21 +125,13 @@ function openPremiumModal(safeName) {
                 </div>
                 <div style="background:#fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
                     <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ccc;">HOURS OF OPERATION</h4>
-                    <div style="line-height:1.4;">${hours}</div>
+                    ${biz.hours || "Mon-Fri: 8am - 5pm"}
                 </div>
-            </div>
-
-            <div style="border: 3px dashed #cc0000; background: #fff; padding: 25px; text-align: center; position:relative; margin-top:10px;">
-                <span style="position:absolute; top:-15px; left:10px; font-size:20px;">✂️</span>
-                <p style="color:#cc0000; font-weight:bold; font-size:1.2rem; margin:0; letter-spacing:1px;">DIGITAL COMMUNITY COUPON</p>
-                <p style="margin:8px 0 0 0; font-size:0.95rem; color:#222;">Show this screen to ${bizName} to redeem!</p>
-                <p style="font-size:0.75rem; color:#777; margin-top:10px; font-style:italic;">One coupon per customer. Not valid with other offers.</p>
             </div>
         `;
         modal.style.display = 'flex';
     }
 }
-
 
 // 5. GLOBAL HELPERS
 function closePremiumModal() {
