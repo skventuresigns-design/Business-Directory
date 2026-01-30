@@ -52,7 +52,7 @@ function initDirectory() {
     });
 }
 
-// 3. RENDER LISTINGS
+// 3. RENDER LISTINGS (Updated Tier Logic)
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
@@ -64,6 +64,9 @@ function displayData(data) {
         const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
         const bizName = biz.name || "Unnamed Business";
 
+        // Logic: Only show phone if the tier is NOT 'basic'
+        const phoneHtml = tier !== 'basic' ? `<p class="phone">${biz.phone || ""}</p>` : '';
+
         const card = document.createElement('div');
         card.className = `card ${tier}`;
 
@@ -71,13 +74,14 @@ function displayData(data) {
             <div class="logo-box">${getSmartImage(biz.imageid)}</div>
             <h3>${bizName}</h3>
             <div class="town-bar ${townClass}-bar">${townClean}</div>
-            <p class="phone">${biz.phone || ""}</p>
+            ${phoneHtml} 
             <p class="category-tag"><i>${biz.category || ""}</i></p>
             ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal('${encodeURIComponent(bizName)}')">Read More</button>` : ''}
         `;
         grid.appendChild(card);
     });
 }
+
 
 // 4. IMAGE HANDLER
 function getSmartImage(id) {
