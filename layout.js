@@ -122,47 +122,40 @@ function populateTownFilter(data) {
 
 // 7. PREMIUM MODAL LOGIC
 function openPremiumModal(encodedName) {
-    try {
-        const name = decodeURIComponent(encodedName);
-        console.log("Attempting to open modal for:", name);
+    const name = decodeURIComponent(encodedName);
+    const biz = masterData.find(b => b.name === name);
 
-        // Find the business. We use .toLowerCase() on both sides to be 100% safe
-        const biz = masterData.find(b => b.name.toLowerCase() === name.toLowerCase());
+    if (!biz) return;
 
-        if (!biz) {
-            console.error("Data Error: Could not find " + name + " in masterData.");
-            return;
-        }
+    // Fill the fields
+    document.getElementById('modal-name').innerText = biz.name;
+    document.getElementById('modal-address').innerText = biz.address || "Clay County, IL";
+    document.getElementById('modal-phone').innerText = biz.phone || "N/A";
+    document.getElementById('modal-category').innerText = biz.category || "Local Business";
+    
+    // Fill the Town Bar
+    const town = (biz.town || "Clay County").trim();
+    const townBar = document.getElementById('modal-town-bar');
+    townBar.innerText = town;
+    townBar.className = `modal-town-label ${town.toLowerCase().replace(/\s+/g, '-')}-bar`;
 
-        // 1. Fill the simple text fields
-        document.getElementById('modal-name').innerText = biz.name;
-        document.getElementById('modal-address').innerText = biz.address || "No address listed";
-        document.getElementById('modal-phone').innerText = biz.phone || "No phone listed";
-        document.getElementById('modal-category').innerText = biz.category || "General";
+    // Fill the Logo
+    const logoBox = document.getElementById('modal-logo');
+    logoBox.innerHTML = getSmartImage(biz.imageid);
 
-        // 2. Handle the Town Bar and Color
-        const town = (biz.town || "Clay County").trim();
-        const townClass = town.toLowerCase().replace(/\s+/g, '-');
-        const townBar = document.getElementById('modal-town-bar');
-        townBar.innerText = town;
-        townBar.className = `modal-town-bar ${townClass}-bar`;
-
-        // 3. Handle the Logo
-        const logoBox = document.getElementById('modal-logo');
-        logoBox.innerHTML = getSmartImage(biz.imageid);
-
-        // 4. Handle the Call Button
-        const callLink = document.getElementById('modal-call-link');
-        const cleanPhone = (biz.phone || "").replace(/\D/g, '');
-        callLink.href = `tel:${cleanPhone}`;
-
-        // 5. FINALLY - Show the modal
-        document.getElementById('premium-modal').style.display = 'flex';
-        console.log("Success: Modal is now visible.");
-
-    } catch (error) {
-        console.error("CRITICAL MODAL ERROR:", error);
+    // Update the Call Link
+    const callLink = document.getElementById('modal-call-link');
+    if (callLink) {
+        const phoneDigits = (biz.phone || "").replace(/\D/g, '');
+        callLink.href = `tel:${phoneDigits}`;
     }
+
+    // Show the Modal
+    document.getElementById('premium-modal').style.display = 'flex';
+}
+
+function closePremiumModal() {
+    document.getElementById('premium-modal').style.display = 'none';
 }
 
 // 8. HELPERS (Date, Weather, Count)
