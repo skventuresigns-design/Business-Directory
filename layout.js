@@ -52,13 +52,15 @@ function displayData(data) {
     if (!grid) return;
     grid.innerHTML = '';
 
-    data.forEach((biz, index) => {
+    data.forEach(biz => {
         const tier = (biz.tier || biz.Tier || 'basic').toLowerCase().trim();
         const bizName = (biz.name || biz.Name || "Unnamed Business").trim();
         const town = (biz.town || biz.Town || "Clay County").trim();
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
-        const phone = biz.phone || biz.Phone || "";
-        const phoneHtml = tier !== 'basic' ? `<p class="phone">${phone}</p>` : '';
+        
+        // --- THE FIX: Create a symbol-free ID for the button ---
+        // This turns "S&K Venture Signs" into "SKVentureSigns"
+        const cleanID = bizName.replace(/[^a-zA-Z0-9]/g, '');
 
         const card = document.createElement('div');
         card.className = `card ${tier}`;
@@ -67,18 +69,22 @@ function displayData(data) {
             <div class="logo-box">${getSmartImage(biz.imageid || biz.ImageID)}</div>
             <h3>${bizName}</h3>
             <div class="town-bar ${townClass}-bar">${town}</div>
-            ${phoneHtml} 
-            <p class="category-tag"><i>${biz.category || biz.Category || ""}</i></p>
-            ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal(${index})">Read More</button>` : ''}
+            ${tier !== 'basic' ? `<p class="phone">${biz.phone || ""}</p>` : ''} 
+            <p class="category-tag"><i>${biz.category || ""}</i></p>
+            ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal('${cleanID}')">Read More</button>` : ''}
         `;
         grid.appendChild(card);
     });
 }
 
+
 // 4. THE PREMIUM POP-OUT (Town Bar & Website Link Fix)
-function openPremiumModal(index) {
-    // Directly access the master list by number
-    const biz = masterData[index];
+function openPremiumModal(cleanID) {
+    // Search masterData for a match by stripping symbols from the names in our list
+    const biz = masterData.find(b => {
+        const checkName = (b.name || b.Name || "").replace(/[^a-zA-Z0-9]/g, '');
+        return checkName === cleanID;
+    });
     
     if (!biz) return;
 
@@ -92,8 +98,7 @@ function openPremiumModal(index) {
         const mapAddress = encodeURIComponent(`${address}, ${town}, IL`);
 
         modalContainer.innerHTML = `
-            <span onclick="closePremiumModal()" 
-                  style="position:absolute; top:15px; right:20px; font-size:45px; cursor:pointer; color:#222; font-weight:bold; z-index:999999; line-height:0.8;">×</span>
+            <span onclick="closePremiumModal()" style="position:absolute; top:15px; right:20px; font-size:45px; cursor:pointer; color:#222; font-weight:bold; z-index:999999; line-height:0.8;">×</span>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 10px;">
                 <div style="text-align: center;">
@@ -101,12 +106,13 @@ function openPremiumModal(index) {
                         ${getSmartImage(biz.imageid || biz.ImageID).replace('<img', '<img style="max-height:100%; max-width:100%;"')}
                     </div>
                     <h2 style="font-family:serif; font-size: 1.4rem; margin: 0;">${biz.name || biz.Name}</h2>
+                    <p style="color: #666; font-style: italic; margin-top: 5px; font-size: 0.9rem;">${biz.category || biz.Category}</p>
                 </div>
 
                 <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem;">
-                    <p style="margin: 12px 0;"><strong>📂 Category:</strong><br>${biz.category || biz.Category}</p>
-                    <p style="margin: 12px 0;"><strong>📍 Address:</strong><br>${address}</p>
-                    <p style="margin: 12px 0;"><strong>📞 Phone:</strong><br>${biz.phone || biz.Phone}</p>
+                    <p style="margin: 15px 0;"><strong>📍 Address:</strong><br>${address}</p>
+                    <p style="margin: 15px 0;"><strong>📞 Phone:</strong><br>${biz.phone || biz.Phone}</p>
+                    <p style="margin: 15px 0;"><strong>🌐 Website:</strong><br><a href="${biz.website || '#'}" target="_blank" style="color:#0044cc;">Visit Website</a></p>
                 </div>
             </div>
 
@@ -114,11 +120,20 @@ function openPremiumModal(index) {
                 ${town}
             </div>
             
-            <p style="text-align:center; padding: 20px;">[Placeholder for your Master List Updates]</p>
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-top: 20px;">
+                <div style="height: 180px; border: 1px solid #222;">
+                    <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${mapAddress}&output=embed"></iframe>
+                </div>
+                <div style="background:#fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
+                    <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ccc;">HOURS</h4>
+                    ${biz.hours || "Contact for hours"}
+                </div>
+            </div>
         `;
         modal.style.display = 'flex';
     }
 }
+
 
 // 5. GLOBAL HELPERS
 function closePremiumModal() {
