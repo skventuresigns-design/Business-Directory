@@ -84,6 +84,13 @@ function openPremiumModal(cleanID) {
     
     if (!biz) return;
 
+    // --- SMART HOURS LOGIC ---
+    let rawHours = (biz.hours || biz.Hours || "").trim();
+    // If empty, N/A, or none, show "Please Call for Hours"
+    let displayHours = (rawHours === "" || rawHours.toLowerCase() === "n/a" || rawHours.toLowerCase() === "none") 
+        ? "Please Call for Hours" 
+        : rawHours;
+
     const modal = document.getElementById('premium-modal');
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
@@ -92,7 +99,6 @@ function openPremiumModal(cleanID) {
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const address = biz.address || biz.Address || "Contact for Address";
         const phone = biz.phone || biz.Phone || "N/A";
-        const bizHours = biz.hours || biz.Hours || "Mon-Fri: 8am - 5pm";
         
         let rawWeb = (biz.website || biz.Website || "").trim();
         let websiteUrl = (rawWeb && !rawWeb.startsWith('http')) ? `https://${rawWeb}` : rawWeb;
@@ -116,13 +122,13 @@ function openPremiumModal(cleanID) {
                 <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem;">
                     <p style="margin: 10px 0;"><strong>📍 Address:</strong><br>${address}</p>
                     <p style="margin: 10px 0;"><strong>📞 Phone:</strong><br>${phone}</p>
-                    ${websiteUrl ? `<p style="margin: 10px 0;"><strong>🌐 Website:</strong><br><a href="${websiteUrl}" target="_blank" style="color:#0044cc;">Visit Website</a></p>` : ''}
-                    ${fbUrl ? `<p style="margin: 10px 0;"><strong>📘 Facebook:</strong><br><a href="${fbUrl}" target="_blank" style="color:#1877F2;">Facebook Page</a></p>` : ''}
+                    ${websiteUrl ? `<p style="margin: 10px 0;"><strong>🌐 Website:</strong><br><a href="${websiteUrl}" target="_blank" style="color:#0044cc; text-decoration:underline;">Visit Website</a></p>` : ''}
+                    ${fbUrl ? `<p style="margin: 10px 0;"><strong>📘 Facebook:</strong><br><a href="${fbUrl}" target="_blank" style="color:#1877F2; text-decoration:underline;">Facebook Page</a></p>` : ''}
                 </div>
             </div>
 
             <div style="position: relative; margin: 20px -40px; text-align: center;">
-                <div style="background: #d4af37; color: #fff; padding: 5px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; font-size: 0.8rem;">
+                <div style="background: #d4af37; color: #fff; padding: 5px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     PREMIUM COMMUNITY PARTNER
                 </div>
             </div>
@@ -136,20 +142,21 @@ function openPremiumModal(cleanID) {
                     <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${mapAddress}&output=embed"></iframe>
                 </div>
                 <div style="background:#fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
-                    <h4 style="margin:0 0 10px 0; border-bottom: 1px solid #ccc;">HOURS</h4>
-                    ${bizHours}
+                    <h4 style="margin:0 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;">HOURS OF OPERATION</h4>
+                    <div style="line-height:1.4;">${displayHours}</div>
                 </div>
             </div>
 
-            <div style="border: 3px dashed #cc0000; padding: 20px; text-align: center; position:relative;">
+            <div style="border: 3px dashed #cc0000; padding: 25px; text-align: center; position:relative; background-color: #fff;">
                 <span style="position:absolute; top:-15px; left:10px; font-size:20px;">✂️</span>
-                <p style="color:#cc0000; font-weight:bold; margin:0;">DIGITAL COMMUNITY COUPON</p>
-                <p style="margin:5px 0 0 0; font-size:0.9rem;">Show this screen to redeem!</p>
+                <p style="color:#cc0000; font-weight:bold; font-size:1.2rem; margin:0; letter-spacing:1px;">DIGITAL COMMUNITY COUPON</p>
+                <p style="margin:8px 0 0 0; font-size:0.95rem; color:#222;">Show this screen to the merchant to redeem!</p>
             </div>
         `;
         modal.style.display = 'flex';
     }
 }
+
 
 // 5. GLOBAL HELPERS
 function closePremiumModal() {
