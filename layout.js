@@ -77,20 +77,15 @@ function displayData(data) {
 
 // 4. THE PREMIUM POP-OUT (Town Bar & Website Link Fix)
 function openPremiumModal(index) {
-    // We pull the data directly from the Master list using the number
+    // Directly access the master list by number
     const biz = masterData[index];
     
-    if (!biz) {
-        console.error("No data found at index:", index);
-        return;
-    }
+    if (!biz) return;
 
     const modal = document.getElementById('premium-modal');
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
     if (modalContainer) {
-        // This part is now safe because 'biz' is already a clean object from your data
-        const bizName = biz.name || biz.Name || "Business";
         const town = (biz.town || biz.Town || "Clay County").trim();
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const address = biz.address || biz.Address || "";
@@ -105,7 +100,7 @@ function openPremiumModal(index) {
                     <div style="height: 100px; margin-bottom: 12px; display:flex; align-items:center; justify-content:center;">
                         ${getSmartImage(biz.imageid || biz.ImageID).replace('<img', '<img style="max-height:100%; max-width:100%;"')}
                     </div>
-                    <h2 style="font-family:serif; font-size: 1.4rem; margin: 0;">${bizName}</h2>
+                    <h2 style="font-family:serif; font-size: 1.4rem; margin: 0;">${biz.name || biz.Name}</h2>
                 </div>
 
                 <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem;">
@@ -118,16 +113,8 @@ function openPremiumModal(index) {
             <div class="town-bar ${townClass}-bar" style="margin: 15px -40px; border-radius: 0; width: calc(100% + 80px); text-align: center; padding: 10px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">
                 ${town}
             </div>
-
-            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 25px; margin-top: 20px;">
-                <div style="height: 180px; border: 1px solid #222;">
-                    <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${mapAddress}&output=embed"></iframe>
-                </div>
-                <div style="background:#fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
-                    <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ccc;">HOURS OF OPERATION</h4>
-                    ${biz.hours || "Mon-Fri: 8am - 5pm"}
-                </div>
-            </div>
+            
+            <p style="text-align:center; padding: 20px;">[Placeholder for your Master List Updates]</p>
         `;
         modal.style.display = 'flex';
     }
