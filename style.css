@@ -121,30 +121,32 @@ body {
 
 /* --- 4. THE READ MORE BUTTON (Black & Gold) --- */
 /* --- THE RESTORED PREMIUM BUTTON --- */
+/* --- THE METALLIC GOLD BUTTON --- */
 .read-more-btn {
-    background-color: #222 !important;     /* Solid Black */
-    color: #d4af37 !important;           /* Gold Text */
-    border: 2px solid #d4af37 !important; /* Gold Border */
+    /* Metallic Gradient: Darker Gold to Lighter Gold */
+    background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c) !important;
+    color: #222 !important;              /* Dark Ink Text for contrast */
+    border: 1px solid #222 !important;   /* Thin black border to make it pop */
     
-    /* These specific measurements restore the "S&K" look */
     padding: 14px 24px !important;
     font-family: 'Playfair Display', serif;
-    font-weight: 800 !important;         /* Makes it bold and impactful */
+    font-weight: 900 !important;         /* Heavy weight for a "stamp" look */
     font-size: 14px !important;
-    letter-spacing: 2px !important;      /* Gives it that "magazine" spacing */
+    letter-spacing: 2px !important;
     text-transform: uppercase;
     
     display: block;
     width: 100%;
     margin-top: 20px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
 }
 
 .read-more-btn:hover {
-    background-color: #d4af37 !important; /* Flips to Gold */
-    color: #222 !important;               /* Flips to Black */
-    letter-spacing: 3px !important;      /* Subtle expansion effect */
+    filter: brightness(1.1);             /* Makes the "metal" shine brighter */
+    transform: translateY(-2px);         /* Lift effect */
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
 }
 
 /* --- 5. TOWN BARS --- */
