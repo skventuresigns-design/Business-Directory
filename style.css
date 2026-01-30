@@ -399,6 +399,16 @@ body {
     overflow-y: auto; /* Allows scrolling if the content is long */
 }
 
+.modal-content {
+    background-color: #fcf6de; /* Your Cream Color */
+    padding: 30px;
+    width: 95%;
+    max-width: 500px;
+    border: 3px solid #222;
+    position: relative;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.3);
+}
+
 /* 1. The Cream Paper Background */
 .paper-texture {
     background-color: #fcf6de; /* Your preferred color */
