@@ -79,24 +79,28 @@ function displayData(data) {
 
 
 // 4. THE PREMIUM POP-OUT (Town Bar & Website Link Fix)
-// --- UPDATED SEARCH LOGIC ---
 function openPremiumModal(encodedName) {
-    const nameToFind = decodeURIComponent(encodedName).toLowerCase().trim();
+    // 1. Clean the incoming name from the button
+    const nameToFind = decodeURIComponent(encodedName).toLowerCase().replace(/\s+/g, '').trim();
     
-    // Fuzzy Search: Find business regardless of case or hidden spaces
+    console.log("Searching for:", nameToFind); // This helps us see what the code is thinking
+
+    // 2. Search the masterData with the same 'cleaning' rules
     const biz = masterData.find(b => {
-        const currentName = (b.name || b.Name || "").toLowerCase().trim();
+        const currentName = (b.name || b.Name || "").toLowerCase().replace(/\s+/g, '').trim();
         return currentName === nameToFind;
     });
     
     if (!biz) {
-        console.error("DEBUG: Could not find match for:", nameToFind);
+        console.error("No match found for:", nameToFind);
+        // Alert only during testing so you can see if it fails
+        alert("Could not find data for: " + nameToFind); 
         return;
     }
 
     const modal = document.getElementById('premium-modal');
     const modalContainer = document.querySelector('#premium-modal .modal-content');
-    
+       
     if (modalContainer) {
         // --- WEBSITE PROTOCOL FIX ---
         let rawWeb = (biz.website || biz.Website || "").trim();
