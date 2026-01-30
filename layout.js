@@ -1,21 +1,14 @@
 /**
- * LAYOUT.JS - The Directory Engine
+ * LAYOUT.JS - The Directory Engine (Master V2)
  */
 
 let masterData = [];
 
 // 1. STARTUP
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("System Check: DOM Loaded");
-    
     if (typeof updateMastheadDate === 'function') updateMastheadDate();
     if (typeof getLocalWeather === 'function') getLocalWeather();
-
-    if (typeof baseCsvUrl === 'undefined') {
-        console.error("CRITICAL: baseCsvUrl is missing from config.js");
-    } else {
-        initDirectory();
-    }
+    if (typeof baseCsvUrl !== 'undefined') initDirectory();
 
     // Close modal if user clicks the dark background
     const modal = document.getElementById('premium-modal');
@@ -30,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function initDirectory() {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
-    
     grid.innerHTML = '<p style="text-align:center;">Loading Community Data...</p>';
 
     Papa.parse(baseCsvUrl, {
@@ -48,162 +40,151 @@ function initDirectory() {
                 populateTownFilter(masterData);
                 displayData(masterData);
                 updateListingCount(masterData.length);
-            } else {
-                grid.innerHTML = '<p>No listings found in the spreadsheet.</p>';
             }
-        },
-        error: function(err) {
-            console.error("PapaParse Error:", err);
         }
     });
 }
 
-// 3. RENDER LISTINGS (Logic for Tiers & Hidden Phone Numbers)
+// 3. RENDER LISTINGS
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     data.forEach(biz => {
-        const tier = (biz.tier || 'basic').toLowerCase();
-        const townClean = (biz.town || "Clay County").trim();
-        const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
-        const bizName = biz.name || "Unnamed Business";
+        // Normalize Tier (Checks for 'tier' or 'Tier')
+        const tier = (biz.tier || biz.Tier || 'basic').toLowerCase().trim();
+        const town = (biz.town || biz.Town || "Clay County").trim();
+        const townClass = town.toLowerCase().replace(/\s+/g, '-');
+        const bizName = biz.name || biz.Name || "Unnamed Business";
 
-        // Logic: Phone numbers only appear for Plus and Premium members
-        const phoneHtml = tier !== 'basic' ? `<p class="phone">${biz.phone || ""}</p>` : '';
+        // Logic: No phone for Basic
+        const phone = biz.phone || biz.Phone || "";
+        const phoneHtml = tier !== 'basic' ? `<p class="phone">${phone}</p>` : '';
 
         const card = document.createElement('div');
         card.className = `card ${tier}`;
 
         card.innerHTML = `
-            <div class="logo-box">${getSmartImage(biz.imageid)}</div>
+            <div class="logo-box">${getSmartImage(biz.imageid || biz.ImageID)}</div>
             <h3>${bizName}</h3>
-            <div class="town-bar ${townClass}-bar">${townClean}</div>
+            <div class="town-bar ${townClass}-bar">${town}</div>
             ${phoneHtml} 
-            <p class="category-tag"><i>${biz.category || ""}</i></p>
+            <p class="category-tag"><i>${biz.category || biz.Category || ""}</i></p>
             ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal('${encodeURIComponent(bizName)}')">Read More</button>` : ''}
         `;
         grid.appendChild(card);
     });
 }
 
-// 4. IMAGE HANDLER
-function getSmartImage(id) {
-    const placeholder = "https://placehold.co/150?text=SMLC";
-    const repo = (typeof mediaRepoBase !== 'undefined') ? mediaRepoBase : "";
-
-    if (!id || id === "N/A" || id.trim() === "") return `<img src="${placeholder}" alt="Logo">`;
-    if (id.toString().startsWith('http')) return `<img src="${id}" alt="Logo" onerror="this.src='${placeholder}'">`;
-    
-    return `<img src="${repo}${id.toString().trim()}" alt="Logo" onerror="this.src='${placeholder}'">`;
-}
-
-// 5. THE DYNAMIC POP-OUT (Metallic Gold Style)
+// 4. THE PREMIUM POP-OUT
 function openPremiumModal(encodedName) {
     const name = decodeURIComponent(encodedName);
     const biz = masterData.find(b => (b.name || b.Name) === name);
     if (!biz) return;
 
+    const modal = document.getElementById('premium-modal');
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
     if (modalContainer) {
-        const mapAddress = encodeURIComponent(`${biz.address}, ${biz.town}, IL`);
+        // Data Normalization (Fixes the Website/Address link issues)
+        const website = biz.website || biz.Website || "#";
+        const address = biz.address || biz.Address || "Contact for Address";
+        const phone = biz.phone || biz.Phone || "N/A";
+        const category = biz.category || biz.Category || "Local Business";
+        const hours = biz.hours || biz.Hours || "Mon-Fri: 8am - 5pm<br>Sat-Sun: Closed";
+        const mapAddress = encodeURIComponent(`${address}, ${biz.town || 'Clay County'}, IL`);
 
-        // Update the content inside the box
+        // Set Container Style to prevent touching top/bottom
+        modalContainer.style.maxHeight = "85vh";
+        modalContainer.style.overflowY = "auto";
+        modalContainer.style.padding = "40px";
+
         modalContainer.innerHTML = `
             <span onclick="closePremiumModal()" 
-                  style="position:absolute; top:15px; right:20px; font-size:40px; cursor:pointer; color:#222; font-weight:bold; z-index:100001; line-height:1;">&times;</span>
+                  style="position:absolute; top:15px; right:20px; font-size:45px; cursor:pointer; color:#222; font-weight:bold; z-index:999999; line-height:0.8;">&times;</span>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px; padding-top: 10px;">
-                
-                <div style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <div style="height: 100px; width: 100%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-                        ${getSmartImage(biz.imageid).replace('<img', '<img style="max-height:100%; max-width:100%;"')}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px;">
+                <div style="text-align: center;">
+                    <div style="height: 100px; margin-bottom: 12px; display:flex; align-items:center; justify-content:center;">
+                        ${getSmartImage(biz.imageid || biz.ImageID).replace('<img', '<img style="max-height:100%; max-width:100%;"')}
                     </div>
-                    <h2 style="font-family:serif; font-size: 1.4rem; margin: 0; color: #222; line-height: 1.2;">${biz.name}</h2>
+                    <h2 style="font-family:serif; font-size: 1.4rem; margin: 0;">${biz.name || biz.Name}</h2>
                 </div>
 
-                <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem; color: #444;">
-                    <p style="margin: 12px 0;"><strong>📂 Category:</strong><br>${biz.category}</p>
-                    <p style="margin: 12px 0;"><strong>📍 Address:</strong><br>${biz.address || 'N/A'}</p>
-                    <p style="margin: 12px 0;"><strong>📞 Phone:</strong><br>${biz.phone || 'N/A'}</p>
-                    <p style="margin: 12px 0;"><strong>🌐 Website:</strong><br><a href="${biz.website || '#'}" target="_blank" style="color: #0044cc; text-decoration: underline;">Visit Website</a></p>
+                <div style="border-left: 1px solid #ccc; padding-left: 20px; text-align: left; font-size: 0.95rem;">
+                    <p style="margin: 15px 0;"><strong>📂 Category:</strong><br>${category}</p>
+                    <p style="margin: 15px 0;"><strong>📍 Address:</strong><br>${address}</p>
+                    <p style="margin: 15px 0;"><strong>📞 Phone:</strong><br>${phone}</p>
+                    <p style="margin: 15px 0;"><strong>🌐 Website:</strong><br><a href="${website}" target="_blank" style="color:#0044cc; text-decoration:underline;">Visit Website</a></p>
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 2px solid #222; margin: 15px 0;">
+            <hr style="border:0; border-top: 2px solid #222; margin: 15px 0;">
 
             <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 25px;">
                 <div style="height: 180px; border: 1px solid #222;">
-                    <iframe width="100%" height="100%" frameborder="0" style="border:0" 
-                        src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${mapAddress}" allowfullscreen>
-                    </iframe>
+                    <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=${mapAddress}&output=embed"></iframe>
                 </div>
-
-                <div style="background: #fff; border: 1px solid #222; padding: 15px; font-size: 0.85rem;">
-                    <h4 style="margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-size: 0.9rem;">HOURS OF OPERATION</h4>
-                    <div style="line-height: 1.6; color: #333;">
-                        ${biz.hours || "Mon-Fri: 8am - 5pm<br>Sat-Sun: Closed"}
-                    </div>
+                <div style="background:#fff; border:1px solid #222; padding:15px; font-size:0.85rem;">
+                    <h4 style="margin:0 0 10px 0; border-bottom:1px solid #ccc;">HOURS OF OPERATION</h4>
+                    ${hours}
                 </div>
             </div>
 
-            <div style="border: 3px dashed #cc0000; background: #fff; padding: 25px; text-align: center; margin-top: 10px;">
-                <p style="color: #cc0000; font-weight: bold; font-size: 1.2rem; margin: 0; letter-spacing: 1px;">DIGITAL COMMUNITY COUPON</p>
-                <p style="color: #222; margin: 8px 0 0 0; font-size: 0.95rem;">Show this screen to the merchant to redeem!</p>
+            <div style="border: 3px dashed #cc0000; background: #fff; padding: 25px; text-align: center; position:relative;">
+                <span style="position:absolute; top:-15px; left:10px; font-size:20px;">✂️</span>
+                <p style="color:#cc0000; font-weight:bold; font-size:1.2rem; margin:0;">DIGITAL COMMUNITY COUPON</p>
+                <p style="margin:8px 0 0 0; font-size:0.95rem;">Show this screen to the merchant to redeem!</p>
             </div>
         `;
-        
-        // Final spacing and reveal
-        document.getElementById('premium-modal').style.display = 'flex';
+        modal.style.display = 'flex';
     }
 }
 
+// 5. GLOBAL HELPERS
+function closePremiumModal() {
+    const modal = document.getElementById('premium-modal');
+    if (modal) modal.style.display = 'none';
+}
 
-// 6. FILTERS
+function getSmartImage(id) {
+    const placeholder = "https://placehold.co/150?text=SMLC";
+    const repo = (typeof mediaRepoBase !== 'undefined') ? mediaRepoBase : "";
+    if (!id || id === "N/A" || id === "") return `<img src="${placeholder}" alt="Logo">`;
+    if (id.toString().startsWith('http')) return `<img src="${id}" alt="Logo" onerror="this.src='${placeholder}'">`;
+    return `<img src="${repo}${id.toString().trim()}" alt="Logo" onerror="this.src='${placeholder}'">`;
+}
+
+// 6. FILTERS & COUNT (Remaining code as before...)
 function applyFilters() {
     const selectedTown = document.getElementById('town-select').value;
     const selectedCat = document.getElementById('cat-select').value;
-
     const filtered = masterData.filter(biz => {
         const bTown = biz.town || biz.Town || "";
         const bCat = biz.category || biz.Category || "";
-        const townMatch = (selectedTown === "All" || bTown === selectedTown);
-        const catMatch = (selectedCat === "All" || bCat === selectedCat);
-        return townMatch && catMatch;
+        return (selectedTown === "All" || bTown === selectedTown) && (selectedCat === "All" || bCat === selectedCat);
     });
-
     displayData(filtered);
     updateListingCount(filtered.length);
 }
-
-// 7. HELPERS
 function updateListingCount(count) {
     const el = document.getElementById('listing-count');
     if (el) el.innerText = `${count} Listings Found`;
 }
-
 function updateMastheadDate() {
     const el = document.getElementById('masthead-date');
-    if (el) {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        el.innerText = new Date().toLocaleDateString('en-US', options);
-    }
+    if (el) el.innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }
-
 async function getLocalWeather() {
     const el = document.getElementById('weather-box');
     if (!el) return;
     try {
         const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.66&longitude=-88.48&current_weather=true');
         const data = await response.json();
-        if (data.current_weather) {
-            el.innerHTML = ` | 🌡️ Flora: ${Math.round((data.current_weather.temperature * 9/5) + 32)}°F`;
-        }
-    } catch (e) { console.log("Weather service unreachable"); }
+        if (data.current_weather) el.innerHTML = ` | 🌡️ Flora: ${Math.round((data.current_weather.temperature * 9/5) + 32)}°F`;
+    } catch (e) {}
 }
-
 function populateCategoryFilter(data) {
     const select = document.getElementById('cat-select');
     if (!select) return;
@@ -212,12 +193,10 @@ function populateCategoryFilter(data) {
     categories.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat;
-        const emoji = (typeof catEmojis !== 'undefined' && catEmojis[cat]) ? catEmojis[cat] : '📁';
-        opt.textContent = `${emoji} ${cat}`;
+        opt.textContent = `📁 ${cat}`;
         select.appendChild(opt);
     });
 }
-
 function populateTownFilter(data) {
     const select = document.getElementById('town-select');
     if (!select) return;
