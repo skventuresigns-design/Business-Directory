@@ -125,56 +125,41 @@ function openPremiumModal(encodedName) {
     const name = decodeURIComponent(encodedName);
     const biz = masterData.find(b => b.name === name);
 
-    if (!biz) return;
-
-    // Fill the fields
-    document.getElementById('modal-name').innerText = biz.name;
-    document.getElementById('modal-address').innerText = biz.address || "Clay County, IL";
-    document.getElementById('modal-phone').innerText = biz.phone || "N/A";
-    document.getElementById('modal-category').innerText = biz.category || "Local Business";
-    
-    // Fill the Town Bar
-    const town = (biz.town || "Clay County").trim();
-    const townBar = document.getElementById('modal-town-bar');
-    townBar.innerText = town;
-    townBar.className = `modal-town-label ${town.toLowerCase().replace(/\s+/g, '-')}-bar`;
-
-    // Fill the Logo
-    const logoBox = document.getElementById('modal-logo');
-    logoBox.innerHTML = getSmartImage(biz.imageid);
-
-    // Update the Call Link
-    const callLink = document.getElementById('modal-call-link');
-    if (callLink) {
-        const phoneDigits = (biz.phone || "").replace(/\D/g, '');
-        callLink.href = `tel:${phoneDigits}`;
+    if (!biz) {
+        alert("Business data not found. Please refresh.");
+        return;
     }
 
-    // Show the Modal
-    document.getElementById('premium-modal').style.display = 'flex';
-}
+    // This creates the content INSIDE the box dynamically
+    // This way, it DOES NOT MATTER if your index.html has the wrong IDs
+    const modalBody = document.querySelector('#premium-modal .modal-content');
+    
+    if (modalBody) {
+        modalBody.innerHTML = `
+            <span class="close-modal" onclick="closePremiumModal()">&times;</span>
+            <div style="text-align:center; margin-bottom:20px;">
+                ${getSmartImage(biz.imageid)}
+            </div>
+            <h2 style="font-family:serif; border-bottom:3px solid #222; color:#222; margin-bottom:10px;">${biz.name}</h2>
+            <p style="background:#444; color:#fff; display:inline-block; padding:5px 15px; font-weight:bold; text-transform:uppercase;">${biz.town || 'Clay County'}</p>
+            
+            <div style="margin-top:20px; color:#222; text-align:left;">
+                <p><strong>📍 Address:</strong> ${biz.address || 'Contact for Address'}</p>
+                <p><strong>📞 Phone:</strong> ${biz.phone || 'N/A'}</p>
+                <p><strong>📂 Category:</strong> ${biz.category || 'Local Business'}</p>
+            </div>
 
-function closePremiumModal() {
-    document.getElementById('premium-modal').style.display = 'none';
-}
+            <div style="border:2px dashed #cc0000; padding:15px; margin-top:20px; background:#fff; text-align:center;">
+                <p style="color:#cc0000; font-weight:bold; margin:0;">COMMUNITY COUPON</p>
+                <p style="color:#222; font-size:0.9rem;">Show this screen to the business for a special local offer!</p>
+            </div>
 
-// 8. HELPERS (Date, Weather, Count)
-function updateListingCount(count) {
-    const el = document.getElementById('listing-count');
-    if (el) el.innerText = `${count} Listings Found`;
-}
-
-function updateMastheadDate() {
-    const el = document.getElementById('masthead-date');
-    if (el) el.innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-async function getLocalWeather() {
-    const el = document.getElementById('weather-box');
-    if (!el) return;
-    try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.66&longitude=-88.48&current_weather=true');
-        const d = await res.json();
-        if (d.current_weather) el.innerHTML = ` | 🌡️ Flora: ${Math.round((d.current_weather.temperature * 9/5) + 32)}°F`;
-    } catch (e) { console.log("Weather unreachable"); }
+            <a href="tel:${(biz.phone || "").replace(/\D/g,'')}" 
+               style="display:block; background:#222; color:#d4af37; text-align:center; padding:15px; margin-top:20px; text-decoration:none; font-weight:bold; border:2px solid #d4af37;">
+               CALL BUSINESS NOW
+            </a>
+        `;
+        
+        document.getElementById('premium-modal').style.display = 'flex';
+    }
 }
