@@ -8,7 +8,6 @@ let masterData = [];
 document.addEventListener('DOMContentLoaded', () => {
     console.log("System Check: DOM Loaded");
     
-    // Safety checks for helper functions
     if (typeof updateMastheadDate === 'function') updateMastheadDate();
     if (typeof getLocalWeather === 'function') getLocalWeather();
 
@@ -16,6 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("CRITICAL: baseCsvUrl is missing from config.js");
     } else {
         initDirectory();
+    }
+
+    // Close modal if user clicks the dark background
+    const modal = document.getElementById('premium-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closePremiumModal();
+        });
     }
 });
 
@@ -31,7 +38,6 @@ function initDirectory() {
         header: true,
         skipEmptyLines: 'greedy',
         complete: function(results) {
-            // Assumes lowercase headers 'name'
             masterData = results.data.filter(row => {
                 const n = row.name || row.Name;
                 return n && n.trim() !== "";
@@ -52,7 +58,7 @@ function initDirectory() {
     });
 }
 
-// 3. RENDER LISTINGS (Updated Tier Logic)
+// 3. RENDER LISTINGS (Logic for Tiers & Hidden Phone Numbers)
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
@@ -64,7 +70,7 @@ function displayData(data) {
         const townClass = townClean.toLowerCase().replace(/\s+/g, '-');
         const bizName = biz.name || "Unnamed Business";
 
-        // Logic: Only show phone if the tier is NOT 'basic'
+        // Logic: Phone numbers only appear for Plus and Premium members
         const phoneHtml = tier !== 'basic' ? `<p class="phone">${biz.phone || ""}</p>` : '';
 
         const card = document.createElement('div');
@@ -82,7 +88,6 @@ function displayData(data) {
     });
 }
 
-
 // 4. IMAGE HANDLER
 function getSmartImage(id) {
     const placeholder = "https://placehold.co/150?text=SMLC";
@@ -94,8 +99,7 @@ function getSmartImage(id) {
     return `<img src="${repo}${id.toString().trim()}" alt="Logo" onerror="this.src='${placeholder}'">`;
 }
 
-// 5. THE DYNAMIC POP-OUT (Bypasses ID Errors)
-// 5. THE DYNAMIC POP-OUT (Metallic Gold Update)
+// 5. THE DYNAMIC POP-OUT (Metallic Gold Style)
 function openPremiumModal(encodedName) {
     const name = decodeURIComponent(encodedName);
     const biz = masterData.find(b => (b.name || b.Name) === name);
@@ -108,9 +112,8 @@ function openPremiumModal(encodedName) {
     const modalContainer = document.querySelector('#premium-modal .modal-content');
     
     if (modalContainer) {
-        // We are writing the HTML directly here so nothing can "break" it in other files
         modalContainer.innerHTML = `
-            <span onclick="closePremiumModal()" style="position:absolute; top:5px; right:15px; font-size:50px; cursor:pointer; color:#222; font-weight:bold; line-height; z-index:100000">&times;</span>
+            <span onclick="closePremiumModal()" style="position:absolute; top:5px; right:15px; font-size:50px; cursor:pointer; color:#222; font-weight:bold; line-height:1; z-index:100000">&times;</span>
             
             <div style="text-align:center; margin-bottom:20px;">
                 ${getSmartImage(biz.imageid)}
@@ -134,11 +137,14 @@ function openPremiumModal(encodedName) {
             </a>
         `;
         
-        // Show the box
         document.getElementById('premium-modal').style.display = 'flex';
     }
 }
 
+function closePremiumModal() {
+    const modal = document.getElementById('premium-modal');
+    if (modal) modal.style.display = 'none';
+}
 
 // 6. FILTERS
 function applyFilters() {
@@ -208,13 +214,4 @@ function populateTownFilter(data) {
         opt.textContent = town;
         select.appendChild(opt);
     });
-}
-
-// Ensure this is at the end of layout.js
-function closePremiumModal() {
-    console.log("Closing modal...");
-    const modal = document.getElementById('premium-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
 }
