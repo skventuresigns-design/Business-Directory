@@ -130,7 +130,7 @@ body {
     border: 1px solid #222 !important;    /* Thin black border to define the shape */
     
     /* Compact Sizing */
-    padding: 10px 19px !important;        /* Smaller: 10px top/bottom, 19px sides */
+    padding: 12px 22px !important;        /* Smaller: 10px top/bottom, 19px sides */
     width: auto;                          /* Takes up less space */
     display: inline-block;                /* Centers it and allows width to shrink */
     
