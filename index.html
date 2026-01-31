@@ -12,25 +12,43 @@
 </head>
 <body>
 
-    <nav class="divi-style-nav">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="https://supportmylocalcommunity.com/">
-                    <img src="https://github.com/skventuresigns-design/media/blob/main/smlc-logo.png?raw=true" alt="SMLC Logo">
-                </a>
-            </div>
-            <div class="nav-links">
-                <a href="https://supportmylocalcommunity.com/clay-city/">Clay City</a>
-                <a href="https://ourflora.com/">Flora</a>
-                <a href="https://supportmylocalcommunity.com/louisville/">Louisville</a>
-                <a href="https://supportmylocalcommunity.com/sailor-springs/">Sailor Springs</a>
-                <a href="https://supportmylocalcommunity.com/xenia/">Xenia</a>
+    <div class="top-nav-bar">
+        <div class="top-nav-links">
+            <a href="https://supportmylocalcommunity.com">SMLC Home Page</a>
+            <a href="https://supportmylocalcommunity.com/clay-city/">Clay City</a>
+            <a href="https://ourflora.com/">Flora</a>
+            <a href="https://supportmylocalcommunity.com/louisville/">Louisville</a>
+            <a href="https://supportmylocalcommunity.com/sailor-springs/">Sailor Springs</a>
+            <a href="https://supportmylocalcommunity.com/xenia/">Xenia</a>
+        </div>
+    </div>
+
+    <nav class="main-nav-bar">
+        <div class="logo-area">
+            <a href="https://businessdirectory.supportmylocalcommunity.com">
+                <img src="https://github.com/skventuresigns-design/media/blob/main/smlc-logo.png?raw=true" alt="SMLC Logo">
+            </a>
+        </div>
+
+        <div class="main-menu-links">
+            <a href="#" class="active" onclick="filterByTier('all')">Business Directory</a>
+            <a href="#" onclick="quickFilterByCategory('Services')">Services</a>
+            <a href="#" onclick="quickFilterByCategory('Dining')">Dining</a>
+            <a href="#" onclick="quickFilterByCategory('Retail')">Shopping</a>
+        </div>
+
+        <div class="search-area">
+            <button id="search-toggle" onclick="toggleSearchBar()">🔍</button>
+            <div id="search-input-wrapper" style="display:none;">
+                <input type="text" id="directory-search" placeholder="Search businesses..." onkeyup="searchBusinesses()">
             </div>
         </div>
     </nav>
 
-    <header class="main-title">
+    <header class="main-title" style="text-align: center;">
         <h1>Clay County Directory</h1>
+        <span class="masthead-towns">Bible Grove • Clay City • Flora • Louisville • Iola • Sailor Springs • Xenia</span>
+
         <div class="newspaper-meta single-row">
             <div class="meta-item left-meta">VOL. 1 — NO. 1 | <span id="masthead-date"></span></div>
             
@@ -42,6 +60,8 @@
                     <option value="Clay City">Clay City</option>
                     <option value="Xenia">Xenia</option>
                     <option value="Sailor Springs">Sailor Springs</option>
+                    <option value="Bible Grove">Bible Grove</option>
+                    <option value="Iola">Iola</option>
                 </select>
             </div>
             
@@ -53,6 +73,9 @@
             <div class="meta-item">
                 <select id="cat-select" onchange="applyFilters()">
                     <option value="All">📂 All Industries</option>
+                    <option value="Services">Services</option>
+                    <option value="Dining">Restaurants & Dining</option>
+                    <option value="Retail">Shopping</option>
                 </select>
             </div>
             
