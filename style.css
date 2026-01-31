@@ -24,20 +24,57 @@ body {
 }
 
 /* --- 2. NAVIGATION & MASTHEAD --- */
-.nav-header {
-    background-color: var(--news-gray);
-    padding: 15px 0;
-    text-align: center;
-    border-bottom: 2px solid var(--ink-black);
+.divi-style-nav {
+    background-color: #ffffff; /* Or your preferred header color */
+    border-bottom: 1px solid #eeeeee;
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.nav-header a {
-    color: var(--ink-black);
+.nav-container {
+    max-width: 95%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo img {
+    height: 50px; /* Adjust based on your logo shape */
+    display: block;
+}
+
+.nav-links a {
+    color: #333;
     text-decoration: none;
-    font-weight: bold;
-    margin: 0 15px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
+    font-weight: 600;
+    margin-left: 25px;
+    font-family: 'Open Sans', Arial, sans-serif;
+    font-size: 15px;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #d4af37; /* Match your premium gold color on hover */
+}
+
+/* --- Mobile Menu Tweak --- */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .nav-links a {
+        margin: 5px 10px;
+    }
 }
 
 .main-title h1 {
