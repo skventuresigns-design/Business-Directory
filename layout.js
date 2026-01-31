@@ -1,27 +1,50 @@
+/**
+ * LAYOUT.JS - The Directory Engine (Master V4 - Coupon & QR Integrated)
+ */
+
 let masterData = [];
 
+// 1. STARTUP & INITIALIZATION
 document.addEventListener('DOMContentLoaded', () => {
     updateMastheadDate();
     getLocalWeather();
     if (typeof baseCsvUrl !== 'undefined') initDirectory();
-    
+
     const modal = document.getElementById('premium-modal');
-    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closePremiumModal(); });
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closePremiumModal();
+        });
+    }
 });
 
+// 2. FETCH DATA FROM GOOGLE SHEETS
 function initDirectory() {
+    const grid = document.getElementById('directory-grid');
+    if (!grid) return;
+    grid.innerHTML = '<p style="text-align:center;">Loading Community Data...</p>';
+
     Papa.parse(baseCsvUrl, {
-        download: true, header: true, skipEmptyLines: 'greedy',
+        download: true,
+        header: true,
+        skipEmptyLines: 'greedy',
         complete: function(results) {
-            masterData = results.data.filter(row => (row.name || row.Name));
-            populateCategoryFilter(masterData); // This fixes the dropdown!
-            populateTownFilter(masterData);
-            displayData(masterData);
-            updateListingCount(masterData.length);
+            masterData = results.data.filter(row => {
+                const n = row.name || row.Name;
+                return n && n.trim() !== "";
+            });
+            
+            if (masterData.length > 0) {
+                populateCategoryFilter(masterData);
+                populateTownFilter(masterData);
+                displayData(masterData);
+                updateListingCount(masterData.length);
+            }
         }
     });
 }
 
+// 3. RENDER LISTINGS GRID
 function displayData(data) {
     const grid = document.getElementById('directory-grid');
     if (!grid) return;
@@ -33,14 +56,20 @@ function displayData(data) {
         const town = (biz.town || biz.Town || "Clay County").trim();
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const cleanID = bizName.replace(/[^a-zA-Z0-9]/g, '');
+        
+        // COUPON LOGIC
+        const offer = (biz.offer || biz.Offer || "").trim();
+        const hasOffer = offer !== "" && offer.toLowerCase() !== "n/a";
 
         const card = document.createElement('div');
         card.className = `card ${tier}`;
+
         card.innerHTML = `
+            ${hasOffer ? `<img src="https://github.com/skventuresigns-design/media/blob/main/Coupon.png?raw=true" class="coupon-badge" alt="Special Offer">` : ''}
             <div class="logo-box">${getSmartImage(biz.imageid || biz.ImageID)}</div>
             <h3>${bizName}</h3>
             <div class="town-bar ${townClass}-bar">${town}</div>
-            ${tier !== 'basic' ? `<p><b>${biz.phone || biz.Phone || ""}</b></p>` : ''}
+            ${tier !== 'basic' ? `<p><b>${biz.phone || biz.Phone || ""}</b></p>` : ''} 
             <p class="category-tag"><i>${biz.category || biz.Category || ""}</i></p>
             ${tier === 'premium' ? `<button class="read-more-btn" onclick="openPremiumModal('${cleanID}')">Read More</button>` : ''}
         `;
@@ -48,7 +77,7 @@ function displayData(data) {
     });
 }
 
-// RESTORED PREMIUM POP-OUT (Full Splendor)
+// 4. THE PREMIUM POP-OUT (Splendor Restored + QR Coupon)
 function openPremiumModal(cleanID) {
     const biz = masterData.find(b => (b.name || b.Name || "").replace(/[^a-zA-Z0-9]/g, '') === cleanID);
     if (!biz) return;
@@ -61,13 +90,21 @@ function openPremiumModal(cleanID) {
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const address = biz.address || biz.Address || "Contact for Address";
         const phone = biz.phone || biz.Phone || "N/A";
+        const offerText = (biz.offer || biz.Offer || "Mention SMLC for local hospitality!").trim();
+        
         const rawHours = (biz.hours || biz.Hours || "").trim();
         const displayHours = (rawHours === "" || rawHours.toLowerCase() === "n/a") ? "Please Call for Hours" : rawHours;
+        
         const rawWeb = (biz.website || biz.Website || "").trim();
         const websiteUrl = (rawWeb && !rawWeb.startsWith('http')) ? `https://${rawWeb}` : rawWeb;
         const rawFB = (biz.facebook || biz.Facebook || "").trim();
         const fbUrl = (rawFB && !rawFB.startsWith('http')) ? `https://${rawFB}` : rawFB;
+
         const mapAddress = encodeURIComponent(`${address}, ${town}, IL`);
+        
+        // AUTO-QR GENERATION
+        const qrData = encodeURIComponent(`Redeem at ${biz.name}: ${offerText}`);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
 
         modalContainer.innerHTML = `
             <span onclick="closePremiumModal()" style="position:absolute; top:8px; right:15px; font-size:45px; cursor:pointer; color:#fff; font-weight:bold; z-index:1000001; line-height:0.8;">×</span>
@@ -109,16 +146,38 @@ function openPremiumModal(cleanID) {
                 </div>
             </div>
 
-            <div style="border: 3px dashed #cc0000; padding: 25px; text-align: center; background-color: #fff;">
-                <p style="color:#cc0000; font-weight:bold; font-size:1.2rem; margin:0;">DIGITAL COMMUNITY COUPON</p>
-                <p style="margin:8px 0 0 0; font-size:0.95rem;">Show this screen to redeem!</p>
+            <div style="border: 3px dashed #cc0000; padding: 20px; text-align: center; background-color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                <div style="text-align: left;">
+                    <p style="color:#cc0000; font-weight:bold; font-size:1.1rem; margin:0; text-transform: uppercase;">DIGITAL COMMUNITY COUPON</p>
+                    <p style="margin:5px 0 0 0; font-size:1rem; color:#222; font-weight:bold;">${offerText}</p>
+                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:#666;">Show this screen to the merchant to redeem.</p>
+                </div>
+                <div style="flex-shrink: 0;">
+                    <img src="${qrUrl}" alt="Scan to Redeem" style="width: 80px; height: 80px; border: 1px solid #ccc;">
+                </div>
             </div>
         `;
         modal.style.display = 'flex';
     }
 }
 
-// SEARCH & FILTERS
+// 5. SEARCH & QUICK-FILTER LOGIC
+function toggleSearchBar() {
+    const el = document.getElementById('search-input-wrapper');
+    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+function searchBusinesses() {
+    const term = document.getElementById('directory-search').value.toLowerCase();
+    const filtered = masterData.filter(biz => {
+        const bName = (biz.name || biz.Name || "").toLowerCase();
+        const bCat = (biz.category || biz.Category || "").toLowerCase();
+        return bName.includes(term) || bCat.includes(term);
+    });
+    displayData(filtered);
+    updateListingCount(filtered.length);
+}
+
 function quickFilterByCategory(catName) {
     const filtered = masterData.filter(biz => {
         const bCat = (biz.category || biz.Category || "").toLowerCase();
@@ -129,6 +188,40 @@ function quickFilterByCategory(catName) {
     });
     displayData(filtered);
     updateListingCount(filtered.length);
+}
+
+// 6. GLOBAL HELPERS
+function closePremiumModal() { document.getElementById('premium-modal').style.display = 'none'; }
+
+function getSmartImage(id) {
+    const placeholder = "https://placehold.co/150?text=SMLC";
+    if (!id || id === "N/A" || id === "") return `<img src="${placeholder}">`;
+    if (id.startsWith('http')) return `<img src="${id}">`;
+    return `<img src="https://raw.githubusercontent.com/skventuresigns-design/media/main/${id}">`;
+}
+
+function applyFilters() {
+    const twn = document.getElementById('town-select').value;
+    const cat = document.getElementById('cat-select').value;
+    const filtered = masterData.filter(biz => (twn === "All" || (biz.town || biz.Town) === twn) && (cat === "All" || (biz.category || biz.Category) === cat));
+    displayData(filtered);
+    updateListingCount(filtered.length);
+}
+
+function filterByTier(tier) {
+    if (tier === 'all') { displayData(masterData); updateListingCount(masterData.length); }
+    else { const filtered = masterData.filter(biz => (biz.tier || biz.Tier || "").toLowerCase().trim() === tier); displayData(filtered); updateListingCount(filtered.length); }
+}
+
+function updateListingCount(count) { document.getElementById('listing-count').innerText = `${count} Listings Found`; }
+function updateMastheadDate() { document.getElementById('masthead-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); }
+
+async function getLocalWeather() {
+    try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.66&longitude=-88.48&current_weather=true');
+        const data = await res.json();
+        document.getElementById('weather-box').innerHTML = ` | 🌡️ Flora: ${Math.round((data.current_weather.temperature * 9/5) + 32)}°F`;
+    } catch (e) {}
 }
 
 function populateCategoryFilter(data) {
@@ -156,40 +249,3 @@ function populateTownFilter(data) {
         select.appendChild(opt);
     });
 }
-
-// REMAINING HELPERS (Search, Tiers, Weather, Date)
-function toggleSearchBar() {
-    const el = document.getElementById('search-input-wrapper');
-    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
-}
-
-function searchBusinesses() {
-    const term = document.getElementById('directory-search').value.toLowerCase();
-    const filtered = masterData.filter(biz => (biz.name || biz.Name || "").toLowerCase().includes(term) || (biz.category || biz.Category || "").toLowerCase().includes(term));
-    displayData(filtered);
-    updateListingCount(filtered.length);
-}
-
-function filterByTier(tier) {
-    if (tier === 'all') { displayData(masterData); updateListingCount(masterData.length); }
-    else { const filtered = masterData.filter(biz => (biz.tier || biz.Tier || "").toLowerCase().trim() === tier); displayData(filtered); updateListingCount(filtered.length); }
-}
-
-function applyFilters() {
-    const twn = document.getElementById('town-select').value;
-    const cat = document.getElementById('cat-select').value;
-    const filtered = masterData.filter(biz => (twn === "All" || (biz.town || biz.Town) === twn) && (cat === "All" || (biz.category || biz.Category) === cat));
-    displayData(filtered);
-    updateListingCount(filtered.length);
-}
-
-function closePremiumModal() { document.getElementById('premium-modal').style.display = 'none'; }
-function getSmartImage(id) {
-    const placeholder = "https://placehold.co/150?text=SMLC";
-    if (!id || id === "N/A" || id === "") return `<img src="${placeholder}">`;
-    if (id.startsWith('http')) return `<img src="${id}">`;
-    return `<img src="https://raw.githubusercontent.com/skventuresigns-design/media/main/${id}">`;
-}
-function updateListingCount(count) { document.getElementById('listing-count').innerText = `${count} Listings Found`; }
-function updateMastheadDate() { document.getElementById('masthead-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); }
-async function getLocalWeather() { try { const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=38.66&longitude=-88.48&current_weather=true'); const data = await res.json(); document.getElementById('weather-box').innerHTML = ` | 🌡️ Flora: ${Math.round((data.current_weather.temperature * 9/5) + 32)}°F`; } catch (e) {} }
