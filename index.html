@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay County Business Directory | SMLC</title>
-    
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/skventuresigns-design/media/main/favicon.png">
-    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
@@ -35,17 +33,17 @@
             <a href="#" onclick="quickFilterByCategory('Services')">Services</a>
             <a href="#" onclick="quickFilterByCategory('Dining')">Dining</a>
             <a href="#" onclick="quickFilterByCategory('Retail')">Shopping</a>
-        </div>
-
-        <div class="search-area">
-            <button id="search-toggle" onclick="toggleSearchBar()">🔍</button>
-            <div id="search-input-wrapper" style="display:none;">
-                <input type="text" id="directory-search" placeholder="Search businesses..." onkeyup="searchBusinesses()">
+            
+            <div class="search-area">
+                <button id="search-toggle" onclick="toggleSearchBar()">🔍</button>
+                <div id="search-input-wrapper" style="display:none;">
+                    <input type="text" id="directory-search" placeholder="Search businesses..." onkeyup="searchBusinesses()">
+                </div>
             </div>
         </div>
     </nav>
 
-    <header class="main-title" style="text-align: center;">
+    <header class="main-title">
         <h1>Clay County Directory</h1>
         <span class="masthead-towns">Bible Grove • Clay City • Flora • Louisville • Iola • Sailor Springs • Xenia</span>
 
@@ -96,12 +94,10 @@
     </div>
 
     <div id="premium-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content">
-            </div>
+        <div class="modal-content"></div>
     </div>
 
     <script src="config.js"></script>
     <script src="layout.js"></script>
-
 </body>
 </html>
