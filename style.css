@@ -29,7 +29,7 @@ body {
 /* TOP BAR (SMLC Network - Blue) */
 .top-nav-bar {
     background-color: var(--smlc-blue);
-    padding: 10px 25px;
+    padding: 10px 45px 10px 0; /* Increased right padding by 20px (from 25px) */
     text-align: right;
 }
 
@@ -47,7 +47,7 @@ body {
     background: #ffffff;
     display: flex;
     align-items: center;
-    padding: 15px 25px 15px 50px; /* 50px left for logo padding */
+    padding: 15px 25px 15px 30px; /* Reduced left padding to 30px to pull logo further left */
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     position: sticky;
     top: 0;
@@ -59,19 +59,23 @@ body {
     display: block;
 }
 
+/* Pushes the links all the way to the right next to search */
 .main-menu-links { 
-    margin-left: 40px; 
-    flex-grow: 1; 
+    margin-left: auto; 
+    margin-right: 20px; 
+    display: flex;
+    align-items: center;
 }
 
 .main-menu-links a {
     color: #000000;
     text-decoration: none;
     font-weight: 700;
-    margin-right: 25px;
+    margin-left: 25px; /* Spacing between links */
     font-size: 15px;
     transition: color 0.3s;
     font-family: Arial, sans-serif;
+    white-space: nowrap; /* Keeps text on one line */
 }
 
 .main-menu-links a:hover, 
