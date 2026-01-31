@@ -175,14 +175,29 @@ function searchBusinesses() {
 }
 
 function quickFilterByCategory(catName) {
-    // Highlight the active header link
+    // 1. Highlight the active header link
     document.querySelectorAll('.main-menu-links a').forEach(a => a.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
 
+    // 2. Smart Match Logic
     const filtered = masterData.filter(biz => {
         const bCat = (biz.category || biz.Category || "").toLowerCase();
-        return bCat.includes(catName.toLowerCase());
+        const searchTarget = catName.toLowerCase();
+
+        // If user clicks "Dining", we look for "dining" OR "restaurant"
+        if (searchTarget === "dining") {
+            return bCat.includes("dining") || bCat.includes("restaurant");
+        }
+        
+        // If user clicks "Shopping", we look for "retail" OR "shopping"
+        if (searchTarget === "retail" || searchTarget === "shopping") {
+            return bCat.includes("retail") || bCat.includes("shopping");
+        }
+
+        // Standard filter for everything else
+        return bCat.includes(searchTarget);
     });
+
     displayData(filtered);
     updateListingCount(filtered.length);
 }
