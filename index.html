@@ -4,30 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clay County Business Directory | SMLC</title>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/skventuresigns-design/media/main/favicon.png">
+    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 <body>
 
-    <div class="nav-header">
-        <a href="https://supportmylocalcommunity.com/">Home</a>
-        <a href="https://supportmylocalcommunity.com/clay-city/">Clay City</a>
-        <a href="https://ourflora.com/">Flora</a>
-        <a href="https://supportmylocalcommunity.com/louisville/">Louisville</a>
-        <a href="https://supportmylocalcommunity.com/sailor-springs/">Sailor Springs</a>
-        <a href="https://supportmylocalcommunity.com/xenia/">Xenia</a>
-    </div>
+    <nav class="divi-style-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="https://supportmylocalcommunity.com/">
+                    <img src="https://github.com/skventuresigns-design/media/blob/main/smlc-logo.png?raw=true" alt="SMLC Logo">
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="https://supportmylocalcommunity.com/clay-city/">Clay City</a>
+                <a href="https://ourflora.com/">Flora</a>
+                <a href="https://supportmylocalcommunity.com/louisville/">Louisville</a>
+                <a href="https://supportmylocalcommunity.com/sailor-springs/">Sailor Springs</a>
+                <a href="https://supportmylocalcommunity.com/xenia/">Xenia</a>
+            </div>
+        </div>
+    </nav>
 
     <header class="main-title">
         <h1>Clay County Directory</h1>
-         <span style="letter-spacing: 5px; text-transform: uppercase; font-size: 12px; color: #666;"><strong>Flora • Louisville • Clay City • Sailor Springs • Xenia</strong></span>
         <div class="newspaper-meta single-row">
             <div class="meta-item left-meta">VOL. 1 — NO. 1 | <span id="masthead-date"></span></div>
             
             <div class="meta-item">
                 <select id="town-select" onchange="applyFilters()">
                     <option value="All">📍 All Towns</option>
-                    </select>
+                    <option value="Flora">Flora</option>
+                    <option value="Louisville">Louisville</option>
+                    <option value="Clay City">Clay City</option>
+                    <option value="Xenia">Xenia</option>
+                    <option value="Sailor Springs">Sailor Springs</option>
+                </select>
             </div>
             
             <div class="meta-item center-header">
