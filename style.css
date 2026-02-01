@@ -143,15 +143,19 @@ body {
     .main-menu-links a { margin: 5px 10px; }
 }
 
+
 /* --- THE COUPON BADGE --- */
 .coupon-badge {
     position: absolute;
-    top: -5px;
-    left: -5px;
-    width: 70px; /* Adjust size as needed */
+    top: 12px;     
+    left: 12px;    
+    width: 80px; 
+    filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3));
     z-index: 100;
-    filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
-    pointer-events: none; /* Allows clicks to pass through to the card */
+    pointer-events: none;
+
+    /* ADD THE TRANSFORM HERE */
+    transform: rotate(-8deg); 
 }
 
 /* Ensure the card container can hold absolute elements */
