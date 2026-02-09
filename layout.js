@@ -90,7 +90,16 @@ function openPremiumModal(cleanID) {
         const townClass = town.toLowerCase().replace(/\s+/g, '-');
         const address = biz.address || biz.Address || "Contact for Address";
         const phone = biz.phone || biz.Phone || "N/A";
-        const offerText = (biz.offer || biz.Offer || "Mention SMLC for local hospitality!").trim();
+        // 1. Check for a bio and an offer
+const bioText = (biz['company-bio'] || biz.Bio || "").trim();
+const rawOffer = (biz.offer || biz.Offer || "").trim();
+
+// 2. Determine which one to prioritize
+// If there is a bio but NO offer, we treat it as a Bio-only display
+const isBioMode = bioText !== "" && (rawOffer === "" || rawOffer.toLowerCase() === "n/a");
+
+// 3. Set the text for the display
+const offerText = isBioMode ? bioText : (rawOffer || "Mention SMLC for local hospitality!");
         
         const rawHours = (biz.hours || biz.Hours || "").trim();
         const displayHours = (rawHours === "" || rawHours.toLowerCase() === "n/a") ? "Please Call for Hours" : rawHours;
@@ -146,16 +155,21 @@ function openPremiumModal(cleanID) {
                 </div>
             </div>
 
-            <div style="border: 3px dashed #cc0000; padding: 20px; text-align: center; background-color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
-                <div style="text-align: left;">
-                    <p style="color:#cc0000; font-weight:bold; font-size:1.1rem; margin:0; text-transform: uppercase;">DIGITAL COMMUNITY COUPON</p>
-                    <p style="margin:5px 0 0 0; font-size:1rem; color:#222; font-weight:bold;">${offerText}</p>
-                    <p style="margin:5px 0 0 0; font-size:0.8rem; color:#666;">Show this screen to the merchant to redeem.</p>
-                </div>
-                <div style="flex-shrink: 0;">
-                    <img src="${qrUrl}" alt="Scan to Redeem" style="width: 80px; height: 80px; border: 1px solid #ccc;">
-                </div>
-            </div>
+            <div style="border: 3px ${isBioMode ? 'solid #222' : 'dashed #cc0000'}; padding: 20px; text-align: ${isBioMode ? 'left' : 'center'}; background-color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+    <div style="flex: 1;">
+        <p style="color:${isBioMode ? '#0c0b82' : '#cc0000'}; font-weight:bold; font-size:1.1rem; margin:0; text-transform: uppercase;">
+            ${isBioMode ? 'About Our Business' : 'DIGITAL COMMUNITY COUPON'}
+        </p>
+        <p style="margin:5px 0 0 0; font-size:1rem; color:#222; ${isBioMode ? 'line-height:1.5;' : 'font-weight:bold;'}">
+            ${offerText}
+        </p>
+        ${!isBioMode ? '<p style="margin:5px 0 0 0; font-size:0.8rem; color:#666;">Show this screen to the merchant to redeem.</p>' : ''}
+    </div>
+    ${!isBioMode ? `
+    <div style="flex-shrink: 0;">
+        <img src="${qrUrl}" alt="Scan to Redeem" style="width: 80px; height: 80px; border: 1px solid #ccc;">
+    </div>` : ''}
+</div>
         `;
         modal.style.display = 'flex';
     }
